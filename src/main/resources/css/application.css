@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'gallant12x22';
+    src: url('../fonts/gallant12x22.ttf');
+}
+
+* {
+    -fx-font-family: 'gallant12x22';
+    font-family: 'gallant12x22', sans-serif;
+}
