@@ -1,0 +1,5 @@
+.vscode/
+target/
+*.db
+gitlab*
+log.txt
