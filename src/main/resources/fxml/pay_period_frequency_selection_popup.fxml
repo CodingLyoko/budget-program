@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="125.0" prefWidth="529.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="src.fxml_controller.PayPeriodFrequencySelectionPopupController">
+   <children>
+      <Text layoutX="34.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Please select the frequency of your checks:">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Text>
+      <Button fx:id="submitButton" layoutX="453.0" layoutY="85.0" mnemonicParsing="false" onAction="#submitButtonOnClick" text="Submit" />
+      <ChoiceBox fx:id="payPeriodFreqChoiceBoxInput" layoutX="34.0" layoutY="50.0" prefHeight="26.0" prefWidth="482.0" />
+   </children>
+</AnchorPane>

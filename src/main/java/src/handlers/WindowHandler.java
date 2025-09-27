@@ -1,18 +1,16 @@
 package src.handlers;
 
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
-import javafx.scene.paint.Color;
+import javafx.scene.input.MouseButton;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import src.shared.Constants;
 import src.shared.FXMLFilenames;
 
 public class WindowHandler {
 
     private static Scene mainScene;
-    private static final int MAIN_WINDOW_WIDTH = 900;
-    private static final int MAIN_WINDOW_HEIGHT = 1000;
 
     private static Scene popupScene;
     private static Stage popupStage = new Stage();
@@ -20,37 +18,33 @@ public class WindowHandler {
     private static Scene alertScene;
     private static Stage alertStage = new Stage();
 
-    private static double gapX = 0;
-    private static double gapY = 0;
+    private static double initialX = 0;
+    private static double initialY = 0;
 
     private WindowHandler() {
     }
 
     public static void initWindows(Stage mainStage) {
         // Main App Window
-        mainScene = new Scene(FXMLHandler.getFxmlInstances().get(FXMLFilenames.EXAMPLE_FXML_FILE).root); // Default Scene
-        mainScene.setFill(Color.TRANSPARENT);
+        mainScene = new Scene(FXMLHandler.getFxmlInstances().get(FXMLFilenames.EXPENSES_PAGE).root); // Default Scene
         mainScene.getStylesheets().add(WindowHandler.class.getResource("/css/application.css").toExternalForm());
 
         mainStage.setTitle(Constants.APP_NAME);
         mainStage.setScene(mainScene);
-        mainStage.setHeight(MAIN_WINDOW_HEIGHT);
-        mainStage.setWidth(MAIN_WINDOW_WIDTH);
 
         makeWindowDraggable(mainScene, mainStage);
 
         // Popup Window
-        popupScene = new Scene(FXMLHandler.getFxmlInstances().get(FXMLFilenames.EXAMPLE_FXML_FILE).root); // Default Scene
-        popupScene.setFill(Color.TRANSPARENT);
+        popupScene = new Scene(FXMLHandler.getFxmlInstances().get(FXMLFilenames.SET_TOTAL_FUNDS_POPUP).root);
+        // Default Scene
         popupScene.getStylesheets().add(WindowHandler.class.getResource("/css/application.css").toExternalForm());
 
         popupStage.initOwner(mainStage); // Sets the Main Window as the Owner of this Stage
         popupStage.initModality(Modality.WINDOW_MODAL); // Disables the Main Window while this one is open
-        popupStage.initStyle(StageStyle.TRANSPARENT);
         popupStage.setScene(popupScene);
 
         makeWindowDraggable(popupScene, popupStage);
-        
+
         mainStage.centerOnScreen();
     }
 
@@ -70,14 +64,22 @@ public class WindowHandler {
 
     private static void makeWindowDraggable(Scene scene, Stage stage) {
 
-        scene.setOnMouseDragged(event -> {
-            stage.setX(event.getScreenX() - gapX);
-            stage.setY(event.getScreenY() - gapY);
+        scene.setOnMousePressed(m -> {
+            if (m.getButton() == MouseButton.PRIMARY) {
+                scene.setCursor(Cursor.MOVE);
+                initialX = (int) (stage.getX() - m.getScreenX());
+                initialY = (int) (stage.getY() - m.getScreenY());
+            }
         });
-        scene.setOnMouseMoved(event -> {
-            gapX = event.getScreenX() - stage.getX();
-            gapY = event.getScreenY() - stage.getY();
+
+        scene.setOnMouseDragged(m -> {
+            if (m.getButton() == MouseButton.PRIMARY) {
+                stage.setX(m.getScreenX() + initialX);
+                stage.setY(m.getScreenY() + initialY);
+            }
         });
+
+        scene.setOnMouseReleased(_ -> scene.setCursor(Cursor.DEFAULT));
     }
 
     public static Scene getCurrentScene() {

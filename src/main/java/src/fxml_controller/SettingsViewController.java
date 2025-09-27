@@ -1,4 +1,4 @@
-package src.controllers;
+package src.fxml_controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;

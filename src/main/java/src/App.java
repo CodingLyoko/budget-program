@@ -6,8 +6,8 @@ import java.sql.SQLException;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import src.backend.ConnectH2;
+import src.handlers.AppUserHandler;
 import src.handlers.FXMLHandler;
 import src.handlers.FXMLHandler.FXMLInstance;
 import src.handlers.SoundHandler;
@@ -24,18 +24,23 @@ public class App extends Application {
 
         initFXML();
         WindowHandler.initWindows(stage);
-        SoundHandler.initialize();
-
-        stage.initStyle(StageStyle.TRANSPARENT);
+        // SoundHandler.initialize();
 
         stage.show();
+
+        // Checks if the User has set a pay period frequency
+        // If not, ask them to set one
+        /*if (AppUserHandler.getAppUserInstance().getPayPeriodFrequency() == null) {
+            WindowHandler.removePopupWindowHeader();
+            WindowHandler.showPopupWindow(FXMLFilenames.PAY_PERIOD_FREQUENCY_SELECTION_POPUP);
+        }*/
     }
 
     public static void main(String[] args) {
         launch();
     }
 
-     /**
+    /**
      * Initializes the FXML files/controllers for the app. Each FXML is tracked in
      * the FXMLFilenames enum.
      * 

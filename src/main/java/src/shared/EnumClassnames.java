@@ -1,7 +1,8 @@
 package src.shared;
 
 public enum EnumClassnames {
-    EXAMPLE_ENUM_CLASS("src.shared.EnumClass");
+    EXPENSE_TYPES("src.shared.ExpenseType"),
+    PAY_PERIOD_FREQUENCIES("src.shared.PayPeriodFrequency");
 
     private final String enumClassname;
 

@@ -1,4 +1,4 @@
-package src.controllers;
+package src.fxml_controller;
 
 import java.net.URISyntaxException;
 import java.util.function.UnaryOperator;
@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
+import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
 import src.handlers.WindowHandler;
 import src.shared.FXMLFilenames;
@@ -237,6 +238,13 @@ public class FXMLControllerTemplate {
         return (Pattern.matches("\\d*", newValue) ? change : null);
     };
 
+    // Filter to ensure only Double values are allowed in an FXML TextField
+    protected static UnaryOperator<Change> doubleFilter = change -> {
+        String newValue = change.getControlNewText();
+
+        return ((Pattern.matches("\\d*", newValue) || Pattern.matches("\\d*\\.\\d{0,2}", newValue))? change : null);
+    };
+
     /**
      * Filters an FXML TextField to allow only Integer values (e.g., 0-9)
      * 
@@ -244,6 +252,15 @@ public class FXMLControllerTemplate {
      */
     protected void allowOnlyIntegersInTextField(TextField textField) {
         textField.setTextFormatter(new TextFormatter<>(new IntegerStringConverter(), null, integerFilter));
+    }
+
+    /**
+     * Filters an FXML TextField to allow only Double values (e.g., 0-9, '.')
+     * 
+     * @param textField - TextField that you want to apply the filter to
+     */
+    protected void allowOnlyDoublesInTextField(TextField textField) {
+        textField.setTextFormatter(new TextFormatter<>(new DoubleStringConverter(), null, doubleFilter));
     }
 
     /**

@@ -5,6 +5,6 @@ public class Constants {
     private Constants(){
     }
 
-    public static final String APP_NAME = "PROJECT NAME";
-    public static final String APP_FILENAME = "project-name";
+    public static final String APP_NAME = "Budget Program";
+    public static final String APP_FILENAME = "budget-program";
 }

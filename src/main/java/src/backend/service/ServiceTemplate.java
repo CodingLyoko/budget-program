@@ -154,7 +154,7 @@ public class ServiceTemplate {
         Class<?> clazz = entryToSave.getClass();
 
         // Get the name of the Database table for this Object
-        String tableName = clazz.getSimpleName().toLowerCase();
+        String tableName = convertStringToSQLSyntax(clazz.getSimpleName());
 
         // Sets a UUID for the Object
         UUID newId = UUID.randomUUID();
@@ -186,7 +186,7 @@ public class ServiceTemplate {
         connectToDatabase();
 
         // Get the name of the Database table for this Object
-        String tableName = entryToUpdate.getClass().getSimpleName().toLowerCase();
+        String tableName = convertStringToSQLSyntax(entryToUpdate.getClass().getSimpleName());
 
         // Get the ID of the updated entry
         UUID result = updateDatabaseEntry(tableName, entryToUpdate);
@@ -197,7 +197,7 @@ public class ServiceTemplate {
     }
 
     /**
-     * Delete an entry in the Database based on th Object being passed as a
+     * Delete an entry in the Database based on the Object being passed as a
      * parameter. The ID of the Object must match an ID of an entry in the Database
      * 
      * @param entryToDelete - an Object representation of the Database entry being
@@ -218,7 +218,7 @@ public class ServiceTemplate {
             connectToDatabase();
 
             // Get the name of the Database table for this Object
-            String tableName = entryToDelete.getClass().getSimpleName().toLowerCase();
+            String tableName = convertStringToSQLSyntax(entryToDelete.getClass().getSimpleName());
 
             // Gets the ID of the entry to be deleted from the Database
             entryId = (UUID) entryToDelete.getClass().getDeclaredMethod("getId").invoke(entryToDelete);
@@ -306,7 +306,9 @@ public class ServiceTemplate {
                     // Strings, Enums, UUIDs
                 } else if (attributeValue.getClass().equals(String.class) || attributeValue.getClass().isEnum()
                         || attributeValue.getClass().equals(UUID.class)) {
-                    sqlQuery.append("'" + sanitizeInputString(attributeValue.toString()) + "'");
+                    sqlQuery.append("'");
+                    sqlQuery.append(sanitizeInputString(attributeValue.toString()));
+                    sqlQuery.append("'");
                     // Timestamps
                 } else if (attributeValue.getClass().equals(Timestamp.class)) {
                     sqlQuery.append(formatTimestamp((Timestamp) attributeValue));
@@ -348,7 +350,8 @@ public class ServiceTemplate {
             // Tells database what values to set for each column
             // Number of columns should match number of attributes in the entry Object
             // being passed as a parameter
-            sqlQuery.append(columnNames.get(i) + "=");
+            sqlQuery.append(columnNames.get(i));
+            sqlQuery.append("=");
 
             try {
 
@@ -360,7 +363,9 @@ public class ServiceTemplate {
                     // Strings, Enums, UUIDs
                 } else if (attributeValue.getClass().equals(String.class) || attributeValue.getClass().isEnum()
                         || attributeValue.getClass().equals(UUID.class)) {
-                    sqlQuery.append("'" + sanitizeInputString(attributeValue.toString()) + "'");
+                    sqlQuery.append("'");
+                    sqlQuery.append(sanitizeInputString(attributeValue.toString()));
+                    sqlQuery.append("'");
                     // Timestamps
                 } else if (attributeValue.getClass().equals(Timestamp.class)) {
                     sqlQuery.append(formatTimestamp((Timestamp) attributeValue));
