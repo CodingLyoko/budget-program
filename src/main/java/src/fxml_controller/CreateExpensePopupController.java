@@ -130,7 +130,7 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
                 currentSelectedPayPeriodTab != null ? ((PayPeriod) currentSelectedPayPeriodTab.getUserData()).getId()
                         : null);
 
-        expenseController.saveEntry(newExpense);
+        expenseController.createExpense(newExpense);
 
         expensePageController.addExpenseToTable(newExpense);
 

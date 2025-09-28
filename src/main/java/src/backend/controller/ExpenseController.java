@@ -54,4 +54,21 @@ public class ExpenseController extends ControllerTemplate {
 
         return result;
     }
+
+    public UUID createExpense(Expense expense) {
+
+        UUID result = null;
+
+        try {
+            result = expenseService.createExpense(expense);
+
+            Logger.info("Successfully created Expense with ID: {}.", result);
+        } catch (SQLException sqle) {
+            Logger.error(SQL_ERROR_TEXT, sqle.getMessage());
+        } catch (Exception e) {
+            Logger.error(GENERAL_ERROR_TEXT, e.getMessage());
+        }
+
+        return result;
+    }
 }

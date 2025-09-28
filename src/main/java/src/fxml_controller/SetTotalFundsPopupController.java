@@ -32,7 +32,7 @@ public class SetTotalFundsPopupController extends FXMLControllerTemplate {
 
     @FXML
     private void submitButtonOnClick(Event e) {
-        AppUserHandler.updateTotalFunds(Double.parseDouble(newTotalFundsTextInput.getText()));
+        AppUserHandler.setTotalFunds(Double.parseDouble(newTotalFundsTextInput.getText()));
         super.closeWindowOnClick(e);
     }
 

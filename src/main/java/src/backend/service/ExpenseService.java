@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import src.backend.controller.PayPeriodController;
 import src.backend.model.Expense;
+import src.handlers.AppUserHandler;
 import src.shared.ExpenseType;
 
 public class ExpenseService extends ServiceTemplate {
@@ -46,6 +47,39 @@ public class ExpenseService extends ServiceTemplate {
                 "SELECT * FROM " + TABLE_NAME + " WHERE expense_type = '" + expenseType + "';");
 
         result = getMultipleEntries(Expense.class, resultSet);
+
+        closeDatabaseConnections();
+
+        return result;
+    }
+
+    public UUID createExpense(Expense expense) throws SQLException {
+        
+        UUID result = UUID.randomUUID();
+
+        connectToDatabase();
+
+        // Sets ID and saves Expense to the database
+        expense.setId(result);
+        insertDatabaseEntry(TABLE_NAME, expense);
+
+        // Modifies AppUser funding values based on Expense Type
+        switch (expense.getExpenseType()) {
+            case ExpenseType.EXPENSE:
+                AppUserHandler.updateAvailableFunds(expense.getSpendingLimit() * -1.0);
+                break;
+            case ExpenseType.INCOME:
+                AppUserHandler.updateTotalFunds(expense.getSpendingLimit());
+                break;
+            case ExpenseType.RESERVED:
+                AppUserHandler.updateReservedFunds(expense.getSpendingLimit());
+                break;
+            case ExpenseType.SAVINGS:
+                AppUserHandler.updateSavingFunds(expense.getSpendingLimit());
+                break;
+            default:
+                break;
+        }
 
         closeDatabaseConnections();
 

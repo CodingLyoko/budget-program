@@ -63,7 +63,7 @@
             <TabPane fx:id="expenseTypeTabPane" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER" />
          </center>
          <right>
-            <VBox fx:id="fundInfoVBox" spacing="15.0" BorderPane.alignment="CENTER">
+            <VBox fx:id="infoVBox" spacing="15.0" BorderPane.alignment="CENTER">
                <children>
                   <Separator />
                   <Label fx:id="totalFundsLabel" text="Total Funds: " />
@@ -76,8 +76,11 @@
                   <Separator />
                </children>
                <BorderPane.margin>
-                  <Insets left="15.0" right="15.0" top="30.0" />
+                  <Insets left="15.0" top="30.0" />
                </BorderPane.margin>
+               <padding>
+                  <Insets right="15.0" />
+               </padding>
             </VBox>
          </right>
       </BorderPane>

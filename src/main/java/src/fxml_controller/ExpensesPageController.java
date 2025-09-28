@@ -43,6 +43,7 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     TableView<Expense> currentTableView = new TableView<>();
 
     private TabPane payPeriodTabPane = new TabPane();
+    private VBox payPeriodInfoVBox = new VBox();
 
     /********** TOP PANEL **********/
     // File Menu
@@ -61,6 +62,8 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     private TabPane expenseTypeTabPane;
 
     /********** RIGHT PANEL **********/
+    @FXML
+    private VBox infoVBox;
     @FXML
     private Label availableFundsLabel;
     @FXML
@@ -88,9 +91,8 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         setExpenseYears();
 
         // Allows code to be executed when the expense year value changes
-        expenseYearInput.getSelectionModel().selectedIndexProperty().addListener((_, _, newValue) -> {
-            onExpenseYearValueChange(newValue);
-        });
+        expenseYearInput.getSelectionModel().selectedIndexProperty()
+                .addListener((_, _, newValue) -> onExpenseYearValueChange(newValue));
 
         createPayPeriodOnAppStart();
 
@@ -103,6 +105,8 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         // Configures and creates Tabs for the Pay Periods in the given Expense Year
         configurePayPeriodTabPane();
         createPayPeriodTabs(expenseYearInput.getValue());
+
+        payPeriodInfoVBox.setSpacing(10);
     }
 
     private void setAvailableFundsLabel() {
@@ -157,8 +161,10 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         payPeriodTabPane.setSide(Side.LEFT);
         payPeriodTabPane.tabClosingPolicyProperty().set(TabClosingPolicy.UNAVAILABLE);
 
-        // Adds a listener to the TabPane that changes the currently selected Tab and
-        // TableView
+        // Adds a listener to the TabPane that does the following:
+        // - Changes the currently selected Tab
+        // - Changes the currently selected TableView
+        // - Updates info about the Pay Period
         payPeriodTabPane.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
             currentSelectedPayPeriodTab = payPeriodTabPane.getSelectionModel().getSelectedItem();
 
@@ -173,6 +179,16 @@ public class ExpensesPageController extends FXMLControllerTemplate {
 
                 // If a TableView exists, enable the button
                 addExpense.setDisable(false);
+
+                // Display info about the given Pay Period
+                ((Label) payPeriodInfoVBox.getChildren().get(0)).setText(
+                        "Start Date: " + ((PayPeriod) newValue.getUserData()).getStartDate().toString().substring(0,
+                                ((PayPeriod) newValue.getUserData()).getStartDate().toString().length() - 11));
+                ((Label) payPeriodInfoVBox.getChildren().get(1)).setText(
+                        "End Date: " + ((PayPeriod) newValue.getUserData()).getEndDate().toString().substring(0,
+                                ((PayPeriod) newValue.getUserData()).getEndDate().toString().length() - 11));
+                ((Label) payPeriodInfoVBox.getChildren().get(2)).setText(
+                        "Is Current: " + ((PayPeriod) newValue.getUserData()).getIsCurrent());
             }
         });
     }
@@ -230,6 +246,9 @@ public class ExpensesPageController extends FXMLControllerTemplate {
                 // If a TableView exists, enable the button
                 addExpense.setDisable(false);
 
+                // Hides Pay Period specific information
+                infoVBox.getChildren().getLast().setVisible(false);
+
                 // Switching to the Expense ExpenseType tab
                 // Check if there is a TableView in the Tab
             } else if (newValue != null && newValue.getContent().getClass().equals(TabPane.class)
@@ -239,6 +258,9 @@ public class ExpensesPageController extends FXMLControllerTemplate {
 
                 // If a TableView exists, enable the button
                 addExpense.setDisable(false);
+
+                // Shows Pay Period specific information for this ExpenseType tab
+                infoVBox.getChildren().getLast().setVisible(true);
             }
         });
     }
@@ -265,7 +287,7 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         tabContent.setSpacing(10);
 
         // Create a resizable TableView for the given Tab
-        TableView<Expense> tableView = createExpenseTableView();
+        TableView<Expense> tableView = createExpenseTableView(false);
         tabContent.getChildren().add(tableView);
         HBox.setHgrow(tableView, Priority.ALWAYS);
 
@@ -311,21 +333,25 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         tabContent.setSpacing(10);
 
         // Create a resizable TableView for the given Tab
-        TableView<Expense> tableView = createExpenseTableView();
+        TableView<Expense> tableView = createExpenseTableView(true);
         tabContent.getChildren().add(tableView);
         HBox.setHgrow(tableView, Priority.ALWAYS);
 
-        // Display info about the given Pay Period
-        VBox payPeriodData = new VBox();
-        payPeriodData.setSpacing(10);
-        payPeriodData.getChildren().add(new Label("Start Date: " + payPeriod.getStartDate().toString().substring(0,
-                payPeriod.getStartDate().toString().length() - 11)));
-        payPeriodData.getChildren().add(new Label("End Date: " + payPeriod.getEndDate().toString().substring(0,
-                payPeriod.getEndDate().toString().length() - 11)));
-        payPeriodData.getChildren().add(new Label("Current? " + payPeriod.getIsCurrent()));
+        // Add the info for this Pay Period to the appropriate area
+        // Only need to add these labels once; the value of the labels will change on
+        // Tab change
+        if (payPeriodTabPane.getTabs().isEmpty()) {
 
-        // Add the info to the given Tab
-        tabContent.getChildren().add(payPeriodData);
+            // Display info about the given Pay Period
+            payPeriodInfoVBox.getChildren()
+                    .add(new Label("Start Date: " + payPeriod.getStartDate().toString().substring(0,
+                            payPeriod.getStartDate().toString().length() - 11)));
+            payPeriodInfoVBox.getChildren().add(new Label("End Date: " + payPeriod.getEndDate().toString().substring(0,
+                    payPeriod.getEndDate().toString().length() - 11)));
+            payPeriodInfoVBox.getChildren().add(new Label("Is Current: " + payPeriod.getIsCurrent()));
+
+            infoVBox.getChildren().add(payPeriodInfoVBox);
+        }
 
         // Add Expenses to the TableView for the given Pay Period
         for (Expense expense : expenseController.getExpensesByPayPeriod(payPeriod.getId())) {
@@ -354,7 +380,14 @@ public class ExpensesPageController extends FXMLControllerTemplate {
      * 
      * @return The configured TableView object
      */
-    private TableView<Expense> createExpenseTableView() {
+
+    /**
+     * Creates a TableView object to hold Expense objects.
+     *
+     * @param showCurrentAmountSpent - toggle to display the "Total Spent" column
+     * @return The configured TableView object
+     */
+    private TableView<Expense> createExpenseTableView(Boolean showCurrentAmountSpent) {
         TableView<Expense> tableView = new TableView<>();
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 
@@ -362,9 +395,11 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         expenseNameColumn.setCellValueFactory(new PropertyValueFactory<>("expenseName"));
         tableView.getColumns().add(expenseNameColumn);
 
-        TableColumn<Expense, Double> totalSpentColumn = new TableColumn<>("Total Spent");
-        totalSpentColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmountSpent"));
-        tableView.getColumns().add(totalSpentColumn);
+        if (showCurrentAmountSpent.equals(Boolean.TRUE)) {
+            TableColumn<Expense, Double> totalSpentColumn = new TableColumn<>("Total Spent");
+            totalSpentColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmountSpent"));
+            tableView.getColumns().add(totalSpentColumn);
+        }
 
         TableColumn<Expense, Double> spendingLimitColumn = new TableColumn<>("Spending Limit");
         spendingLimitColumn.setCellValueFactory(new PropertyValueFactory<>("spendingLimit"));
@@ -419,10 +454,12 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         createPayPeriod.setDisable(isDisabled);
     }
 
+    /****************************** FXML FUNCTIONS ******************************/
     @FXML
     private void setTotalFundsOnClick() {
         openPopup(FXMLFilenames.SET_TOTAL_FUNDS_POPUP);
         setTotalFundsLabel();
+        setAvailableFundsLabel();
     }
 
     @FXML
@@ -450,6 +487,12 @@ public class ExpensesPageController extends FXMLControllerTemplate {
                 .setExpenseTypes((ExpenseType) currentSelectedExpenseTab.getUserData());
 
         openPopup(FXMLFilenames.CREATE_EXPENSE_POPUP);
+
+        // Display changes made to any funding values
+        setTotalFundsLabel();
+        setReservedFundsLabel();
+        setSavingsLabel();
+        setAvailableFundsLabel();
     }
 
     @FXML
