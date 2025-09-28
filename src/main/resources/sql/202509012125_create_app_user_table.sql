@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS app_user (
     id UUID PRIMARY KEY,
     total_funds DOUBLE,
-    savings DOUBLE, -- TODO: REMOVE
+    reserved_funds DOUBLE,
+    saving_funds DOUBLE,
+    available_funds DOUBLE,
     pay_period_frequency VARCHAR(64) -- ENUM
 );
 

@@ -7,6 +7,7 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import src.backend.controller.ExpenseController;
 import src.backend.model.Expense;
@@ -35,26 +36,34 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
 
     @FXML
     public void initialize() {
-        resetInputValues();
-
         allowOnlyDoublesInTextField(spendingLimitInput);
-
-        setExpenseTypes();
-
         setInputListeners();
     }
 
     /**
      * Populates the options for the Expense Type input field.
      */
-    private void setExpenseTypes() {
-        for (ExpenseType expenseType : ExpenseType.values()) {
-            expenseTypeInput.getItems().add(expenseType);
+    public void setExpenseTypes(ExpenseType expenseType) {
+
+        // Clears any previous options
+        expenseTypeInput.getItems().clear();
+
+        // Adds the given expense type to the list of options
+        expenseTypeInput.getItems().add(expenseType);
+
+        // Some Expense Type tabs are associated with multiple ExpenseTypes
+        // This code adds thos additional ExpenseTypes as options
+        if (expenseType.equals(ExpenseType.EXPENSE)) {
+            expenseTypeInput.getItems().add(ExpenseType.INCOME);
         }
+
+        // Sets the first option as the default value
+        expenseTypeInput.setValue(expenseTypeInput.getItems().get(0));
     }
 
     /**
-     * Adds listeners to each required input field to check if they are are complete.
+     * Adds listeners to each required input field to check if they are are
+     * complete.
      */
     private void setInputListeners() {
         instantiateInputValueMap();
@@ -70,7 +79,7 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
         });
 
         expenseTypeInput.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
-            inputValues.put("expenseTypeInput", newValue.toString());
+            inputValues.put("expenseTypeInput", newValue != null ? newValue.toString() : "");
             checkInputsCompleted();
         });
     }
@@ -83,7 +92,7 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
     private void instantiateInputValueMap() {
         inputValues.put("expenseNameInput", "");
         inputValues.put("spendingLimitInput", "");
-        inputValues.put("expenseTypeInput", expenseTypeInput.getValue().toString());
+        inputValues.put("expenseTypeInput", "");
     }
 
     /**
@@ -114,7 +123,12 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
 
         // Sets the Pay Period of the Expense to whatever Pay Period the user had
         // selected when creating the Expense
-        newExpense.setPayPeriod(((PayPeriod) expensePageController.currentSelectedTab.getUserData()).getId());
+        // If there is no Pay Period associated with the Expense Type, set this value to
+        // NULL
+        Tab currentSelectedPayPeriodTab = expensePageController.currentSelectedPayPeriodTab;
+        newExpense.setPayPeriod(
+                currentSelectedPayPeriodTab != null ? ((PayPeriod) currentSelectedPayPeriodTab.getUserData()).getId()
+                        : null);
 
         expenseController.saveEntry(newExpense);
 
@@ -131,6 +145,5 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
     private void resetInputValues() {
         expenseNameInput.clear();
         spendingLimitInput.clear();
-        expenseTypeInput.setValue(ExpenseType.EXPENSE);
     }
 }

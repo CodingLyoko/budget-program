@@ -9,6 +9,7 @@ import org.tinylog.Logger;
 
 import src.backend.model.Expense;
 import src.backend.service.ExpenseService;
+import src.shared.ExpenseType;
 
 public class ExpenseController extends ControllerTemplate {
 
@@ -28,6 +29,23 @@ public class ExpenseController extends ControllerTemplate {
             result = expenseService.getExpensesByPayPeriod(payPeriodId);
 
             Logger.info("Successfully retrieved expenses for Pay Period with ID: {}.", payPeriodId);
+        } catch (SQLException sqle) {
+            Logger.error(SQL_ERROR_TEXT, sqle.getMessage());
+        } catch (Exception e) {
+            Logger.error(GENERAL_ERROR_TEXT, e.getMessage());
+        }
+
+        return result;
+    }
+
+    public List<Expense> getExpensesByExpenseType(ExpenseType expenseType) {
+
+        List<Expense> result = new ArrayList<>();
+
+        try {
+            result = expenseService.getExpensesByExpenseType(expenseType);
+
+            Logger.info("Successfully retrieved expenses with Expense Type: {}.", expenseType);
         } catch (SQLException sqle) {
             Logger.error(SQL_ERROR_TEXT, sqle.getMessage());
         } catch (Exception e) {

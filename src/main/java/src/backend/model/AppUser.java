@@ -13,7 +13,9 @@ public class AppUser extends ModelTemplate {
 
     public AppUser() {
         this.totalFunds = 0.0;
-        this.savings = 0.0;
+        this.reservedFunds = 0.0;
+        this.savingFunds = 0.0;
+        this.availableFunds = 0.0;
         this.payPeriodFrequency = PayPeriodFrequency.BIWEEKLY;
     }
 
@@ -23,6 +25,8 @@ public class AppUser extends ModelTemplate {
 
     private UUID id;
     private Double totalFunds;
-    private Double savings;
+    private Double reservedFunds;
+    private Double savingFunds;
+    private Double availableFunds;
     private PayPeriodFrequency payPeriodFrequency;
 }

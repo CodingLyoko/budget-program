@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import src.backend.controller.PayPeriodController;
 import src.backend.model.Expense;
+import src.shared.ExpenseType;
 
 public class ExpenseService extends ServiceTemplate {
 
@@ -25,6 +26,24 @@ public class ExpenseService extends ServiceTemplate {
 
         ResultSet resultSet = getQueryResults(
                 "SELECT * FROM " + TABLE_NAME + " WHERE pay_period = '" + payPeriodId + "';");
+
+        result = getMultipleEntries(Expense.class, resultSet);
+
+        closeDatabaseConnections();
+
+        return result;
+    }
+
+    public List<Expense> getExpensesByExpenseType(ExpenseType expenseType)
+            throws SQLException, InstantiationException, IllegalAccessException, IllegalArgumentException,
+            InvocationTargetException, NoSuchMethodException, SecurityException {
+
+        List<Expense> result;
+
+        connectToDatabase();
+
+        ResultSet resultSet = getQueryResults(
+                "SELECT * FROM " + TABLE_NAME + " WHERE expense_type = '" + expenseType + "';");
 
         result = getMultipleEntries(Expense.class, resultSet);
 
