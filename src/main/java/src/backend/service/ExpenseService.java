@@ -17,6 +17,32 @@ public class ExpenseService extends ServiceTemplate {
 
     PayPeriodController payPeriodController = new PayPeriodController();
 
+    public UUID createExpense(Expense expense) throws SQLException, IllegalAccessException, InvocationTargetException,
+            NoSuchMethodException, SecurityException {
+
+        UUID result = saveEntry(expense);
+
+        // Modifies AppUser funding values based on Expense Type
+        switch (expense.getExpenseType()) {
+            case ExpenseType.EXPENSE:
+                AppUserHandler.updateAvailableFunds(expense.getSpendingLimit() * -1.0);
+                break;
+            case ExpenseType.INCOME:
+                AppUserHandler.updateTotalFunds(expense.getSpendingLimit());
+                break;
+            case ExpenseType.RESERVED:
+                AppUserHandler.updateReservedFunds(expense.getSpendingLimit());
+                break;
+            case ExpenseType.SAVINGS:
+                AppUserHandler.updateSavingFunds(expense.getSpendingLimit());
+                break;
+            default:
+                break;
+        }
+
+        return result;
+    }
+
     public List<Expense> getExpensesByPayPeriod(UUID payPeriodId)
             throws SQLException, InstantiationException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, NoSuchMethodException, SecurityException {
@@ -53,36 +79,81 @@ public class ExpenseService extends ServiceTemplate {
         return result;
     }
 
-    public UUID createExpense(Expense expense) throws SQLException {
-        
-        UUID result = UUID.randomUUID();
+    public UUID updateExpense(Expense expense) throws SQLException, InstantiationException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 
-        connectToDatabase();
+        Expense oldExpense = (Expense) getEntryById(expense.getId(), Expense.class);
 
-        // Sets ID and saves Expense to the database
-        expense.setId(result);
-        insertDatabaseEntry(TABLE_NAME, expense);
+        updateEntry(expense);
 
         // Modifies AppUser funding values based on Expense Type
         switch (expense.getExpenseType()) {
             case ExpenseType.EXPENSE:
-                AppUserHandler.updateAvailableFunds(expense.getSpendingLimit() * -1.0);
+                AppUserHandler.updateTotalFunds(oldExpense.getCurrentAmountSpent() - expense.getCurrentAmountSpent(),
+                        true);
+
+                if (expense.getCurrentAmountSpent() > oldExpense.getSpendingLimit()) {
+
+                    if (oldExpense.getSpendingLimit() > oldExpense.getCurrentAmountSpent()) {
+                        AppUserHandler
+                                .updateAvailableFunds(oldExpense.getSpendingLimit() - expense.getCurrentAmountSpent());
+                    } else {
+                        AppUserHandler.updateAvailableFunds(
+                                oldExpense.getCurrentAmountSpent() - expense.getCurrentAmountSpent());
+                    }
+                } else if (expense.getCurrentAmountSpent() < oldExpense.getCurrentAmountSpent()
+                        && oldExpense.getSpendingLimit() < oldExpense.getCurrentAmountSpent()) {
+                    AppUserHandler
+                            .updateAvailableFunds(oldExpense.getCurrentAmountSpent() - expense.getSpendingLimit());
+                } else if (expense.getSpendingLimit() < oldExpense.getSpendingLimit()
+                        && expense.getCurrentAmountSpent() > expense.getSpendingLimit()) {
+                    AppUserHandler
+                            .updateAvailableFunds(oldExpense.getSpendingLimit() - expense.getCurrentAmountSpent());
+                } else {
+                    AppUserHandler.updateAvailableFunds(oldExpense.getSpendingLimit() - expense.getSpendingLimit());
+                }
+
                 break;
             case ExpenseType.INCOME:
-                AppUserHandler.updateTotalFunds(expense.getSpendingLimit());
+                AppUserHandler.updateTotalFunds(expense.getSpendingLimit() - oldExpense.getSpendingLimit());
                 break;
             case ExpenseType.RESERVED:
-                AppUserHandler.updateReservedFunds(expense.getSpendingLimit());
+                AppUserHandler.updateReservedFunds(expense.getSpendingLimit() - oldExpense.getSpendingLimit());
                 break;
             case ExpenseType.SAVINGS:
-                AppUserHandler.updateSavingFunds(expense.getSpendingLimit());
+                AppUserHandler.updateSavingFunds(expense.getSpendingLimit() - oldExpense.getSpendingLimit());
                 break;
             default:
                 break;
         }
 
-        closeDatabaseConnections();
+        return expense.getId();
+    }
 
-        return result;
+    public UUID deleteExpense(Expense expense) throws SQLException, IllegalAccessException, InvocationTargetException,
+            NoSuchMethodException, SecurityException {
+
+        deleteEntry(expense);
+
+        // Modifies AppUser funding values based on Expense Type
+        switch (expense.getExpenseType()) {
+            case ExpenseType.EXPENSE:
+                AppUserHandler.updateAvailableFunds(expense.getSpendingLimit() - expense.getCurrentAmountSpent());
+                AppUserHandler.updateTotalFunds(expense.getCurrentAmountSpent());
+                break;
+            case ExpenseType.INCOME:
+                AppUserHandler.updateTotalFunds(expense.getSpendingLimit() * -1.0);
+                break;
+            case ExpenseType.RESERVED:
+                AppUserHandler.updateReservedFunds(expense.getSpendingLimit() * -1.0);
+                break;
+            case ExpenseType.SAVINGS:
+                AppUserHandler.updateSavingFunds(expense.getSpendingLimit() * -1.0);
+                break;
+            default:
+                break;
+        }
+
+        return expense.getId();
     }
 }

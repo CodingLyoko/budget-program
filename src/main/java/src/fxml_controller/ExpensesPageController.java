@@ -377,12 +377,6 @@ public class ExpensesPageController extends FXMLControllerTemplate {
 
     /**
      * Creates a TableView object to hold Expense objects.
-     * 
-     * @return The configured TableView object
-     */
-
-    /**
-     * Creates a TableView object to hold Expense objects.
      *
      * @param showCurrentAmountSpent - toggle to display the "Total Spent" column
      * @return The configured TableView object
@@ -454,6 +448,24 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         createPayPeriod.setDisable(isDisabled);
     }
 
+    /**
+     * Display changes made to any funding values.
+     */
+    private void updateFundingLabels() {
+        setTotalFundsLabel();
+        setReservedFundsLabel();
+        setSavingsLabel();
+        setAvailableFundsLabel();
+    }
+
+    public void updateSelectedExpense(Expense updatedExpense) {
+        currentTableView.getSelectionModel().getSelectedItem().setExpenseName(updatedExpense.getExpenseName());
+        currentTableView.getSelectionModel().getSelectedItem().setCurrentAmountSpent(updatedExpense.getCurrentAmountSpent());
+        currentTableView.getSelectionModel().getSelectedItem().setSpendingLimit(updatedExpense.getSpendingLimit());
+
+        currentTableView.refresh();
+    }
+
     /****************************** FXML FUNCTIONS ******************************/
     @FXML
     private void setTotalFundsOnClick() {
@@ -488,16 +500,28 @@ public class ExpensesPageController extends FXMLControllerTemplate {
 
         openPopup(FXMLFilenames.CREATE_EXPENSE_POPUP);
 
-        // Display changes made to any funding values
-        setTotalFundsLabel();
-        setReservedFundsLabel();
-        setSavingsLabel();
-        setAvailableFundsLabel();
+        updateFundingLabels();
     }
 
     @FXML
     private void editExpenseOnClick() {
 
+        UpdateExpensePopupController expensePopupController = ((UpdateExpensePopupController) FXMLHandler
+                .getFxmlController(FXMLFilenames.UPDATE_EXPENSE_POPUP));
+
+        // Sets the options for the ExpenseType input based on the currently-selected
+        // Expense Type tab
+        expensePopupController.updateSpendingLimitLabel((ExpenseType) currentSelectedExpenseTab.getUserData());
+
+        // Send over the current expense from the current TableView
+        expensePopupController.updateDefaultValues(currentTableView.getSelectionModel().getSelectedItem());
+
+        // Hides certain inputs based on Expense Type
+        expensePopupController.hideInputFields(currentTableView.getSelectionModel().getSelectedItem().getExpenseType());
+
+        openPopup(FXMLFilenames.UPDATE_EXPENSE_POPUP);
+
+        updateFundingLabels();
     }
 
     @FXML
@@ -506,9 +530,11 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         Expense selectedExpense = currentTableView.getSelectionModel().getSelectedItem();
 
         // Deletes the Expense from the database
-        expenseController.deleteEntry(selectedExpense);
+        expenseController.deleteExpense(selectedExpense);
 
         // Delete the Expense from the TableView
         currentTableView.getItems().remove(selectedExpense);
+
+        updateFundingLabels();
     }
 }

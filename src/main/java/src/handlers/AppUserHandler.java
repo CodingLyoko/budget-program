@@ -47,6 +47,33 @@ public class AppUserHandler {
         Logger.info("Successfully updated total funds for the User.");
     }
 
+    /**
+     * Overloaded function; handles updating the Total Funds amount when making a
+     * change to the Current Amount Spent column of a TableView
+     * 
+     * @param changeInFunds        - the amount to change the funds by
+     * @param isCurrentAmountSpent - tells the function if this update is being made
+     *                             due to a change in current amount spent
+     */
+    public static void updateTotalFunds(Double changeInFunds, Boolean isCurrentAmountSpent) {
+
+        Double newTotalFunds = appUser.getTotalFunds();
+        newTotalFunds += changeInFunds;
+
+        appUser.setTotalFunds(newTotalFunds);
+
+        if (isCurrentAmountSpent.equals(Boolean.FALSE)) {
+            Double newAvailableFunds = appUser.getAvailableFunds();
+            newAvailableFunds += changeInFunds;
+
+            appUser.setAvailableFunds(newAvailableFunds);
+        }
+
+        updateAppUser();
+
+        Logger.info("Successfully updated total funds for the User.");
+    }
+
     public static void updateAvailableFunds(Double changeInFunds) {
 
         Double newAvailableFunds = appUser.getAvailableFunds();

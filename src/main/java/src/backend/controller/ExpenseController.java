@@ -15,10 +15,28 @@ public class ExpenseController extends ControllerTemplate {
 
     private ExpenseService expenseService = new ExpenseService();
 
+    public UUID createExpense(Expense expense) {
+
+        UUID result = null;
+
+        try {
+            result = expenseService.createExpense(expense);
+
+            Logger.info("Successfully created Expense with ID: {}.", result);
+        } catch (SQLException sqle) {
+            Logger.error(SQL_ERROR_TEXT, sqle.getMessage());
+        } catch (Exception e) {
+            Logger.error(GENERAL_ERROR_TEXT, e.getMessage());
+        }
+
+        return result;
+    }
+
     /**
      * Returns all the Expenses tied to a given Pay Period ID.
      * 
-     * @param payPeriodId - the UUID of the Pay Period whose Expenses you with to retrieve
+     * @param payPeriodId - the UUID of the Pay Period whose Expenses you with to
+     *                    retrieve
      * @return A List of Expenses tied to the given Pay Period
      */
     public List<Expense> getExpensesByPayPeriod(UUID payPeriodId) {
@@ -55,14 +73,31 @@ public class ExpenseController extends ControllerTemplate {
         return result;
     }
 
-    public UUID createExpense(Expense expense) {
+    public UUID updateExpense(Expense expense) {
 
         UUID result = null;
 
         try {
-            result = expenseService.createExpense(expense);
+            result = expenseService.updateExpense(expense);
 
-            Logger.info("Successfully created Expense with ID: {}.", result);
+            Logger.info("Successfully updated Expense with ID: {}.", result);
+        } catch (SQLException sqle) {
+            Logger.error(SQL_ERROR_TEXT, sqle.getMessage());
+        } catch (Exception e) {
+            Logger.error(GENERAL_ERROR_TEXT, e.getMessage());
+        }
+
+        return result;
+    }
+
+    public UUID deleteExpense(Expense expense) {
+
+        UUID result = null;
+
+        try {
+            result = expenseService.deleteExpense(expense);
+
+            Logger.info("Successfully deleted Expense with ID: {}.", result);
         } catch (SQLException sqle) {
             Logger.error(SQL_ERROR_TEXT, sqle.getMessage());
         } catch (Exception e) {
