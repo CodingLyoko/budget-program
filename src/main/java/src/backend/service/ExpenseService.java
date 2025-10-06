@@ -26,6 +26,7 @@ public class ExpenseService extends ServiceTemplate {
         switch (expense.getExpenseType()) {
             case ExpenseType.EXPENSE:
                 AppUserHandler.updateAvailableFunds(expense.getSpendingLimit() * -1.0);
+                AppUserHandler.updateTotalFunds(expense.getCurrentAmountSpent() * -1.0, true);
                 break;
             case ExpenseType.INCOME:
                 AppUserHandler.updateTotalFunds(expense.getSpendingLimit());
@@ -97,6 +98,8 @@ public class ExpenseService extends ServiceTemplate {
                     if (oldExpense.getSpendingLimit() > oldExpense.getCurrentAmountSpent()) {
                         AppUserHandler
                                 .updateAvailableFunds(oldExpense.getSpendingLimit() - expense.getCurrentAmountSpent());
+                    } else if (expense.getSpendingLimit() > oldExpense.getCurrentAmountSpent()) {
+                        AppUserHandler.updateAvailableFunds(oldExpense.getCurrentAmountSpent() - expense.getSpendingLimit());
                     } else {
                         AppUserHandler.updateAvailableFunds(
                                 oldExpense.getCurrentAmountSpent() - expense.getCurrentAmountSpent());

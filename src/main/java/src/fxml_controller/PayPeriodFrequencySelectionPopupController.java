@@ -5,6 +5,8 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import lombok.Getter;
+import lombok.Setter;
 import src.backend.controller.PayPeriodController;
 import src.backend.model.PayPeriod;
 import src.handlers.AppUserHandler;
@@ -12,7 +14,11 @@ import src.shared.PayPeriodFrequency;
 
 public class PayPeriodFrequencySelectionPopupController extends FXMLControllerTemplate {
 
-    PayPeriodController payPeriodController = new PayPeriodController();
+    private PayPeriodController payPeriodController = new PayPeriodController();
+
+    @Getter
+    @Setter
+    public Boolean submitSuccess = false;
 
     @FXML
     private ChoiceBox<PayPeriodFrequency> payPeriodFreqChoiceBoxInput;
@@ -34,6 +40,8 @@ public class PayPeriodFrequencySelectionPopupController extends FXMLControllerTe
         currentPayPeriod.setEndDate(PayPeriodFrequency.getEndDate(currentPayPeriod.getStartDate()));
 
         payPeriodController.udpateCurrentPayPeriod(currentPayPeriod);
+
+        submitSuccess = true;
 
         super.closeWindowOnClick(e);
     }

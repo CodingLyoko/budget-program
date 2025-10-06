@@ -6,6 +6,7 @@ import java.util.Map;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
@@ -33,6 +34,9 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
 
     @FXML
     private ChoiceBox<ExpenseType> expenseTypeInput;
+
+    @FXML
+    private CheckBox alreadyPaidCheckBox;
 
     @FXML
     private Button submitButton;
@@ -148,11 +152,17 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
         ExpensesPageController expensePageController = ((ExpensesPageController) FXMLHandler
                 .getFxmlController(FXMLFilenames.EXPENSES_PAGE));
 
+        Double spendingLimitValue = Double.parseDouble(spendingLimitInput.getText());
+
         // Creates a new Expense object based on user input
         Expense newExpense = new Expense();
         newExpense.setExpenseName(expenseNameInput.getText());
-        newExpense.setSpendingLimit(Double.parseDouble(spendingLimitInput.getText()));
+        newExpense.setSpendingLimit(spendingLimitValue);
         newExpense.setExpenseType(expenseTypeInput.getValue());
+
+        if (alreadyPaidCheckBox.isSelected()) {
+            newExpense.setCurrentAmountSpent(spendingLimitValue);
+        }
 
         // Sets the Pay Period of the Expense to whatever Pay Period the user had
         // selected when creating the Expense
@@ -178,5 +188,6 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
     private void resetInputValues() {
         expenseNameInput.clear();
         spendingLimitInput.clear();
+        alreadyPaidCheckBox.setSelected(false);
     }
 }

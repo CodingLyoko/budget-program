@@ -23,6 +23,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import src.backend.controller.ExpenseController;
 import src.backend.controller.PayPeriodController;
 import src.backend.model.Expense;
@@ -291,13 +292,14 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         tabContent.getChildren().add(tableView);
         HBox.setHgrow(tableView, Priority.ALWAYS);
 
-        // Add Expenses to the TableView for the given ExpenseType
-        for (Expense expense : expenseController.getExpensesByExpenseType(expenseType)) {
-            tableView.getItems().add(expense);
-        }
-
         // Sets the currently-selected TableView to this object
         currentTableView = tableView;
+
+        // Add Expenses to the TableView for the given ExpenseType
+        for (Expense expense : expenseController.getExpensesByExpenseType(expenseType)) {
+            // tableView.getItems().add(expense);
+            addExpenseToTable(expense);
+        }
 
         if (expenseType.equals(ExpenseType.EXPENSE)) {
             newTab.setContent(payPeriodTabPane);
@@ -337,6 +339,9 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         tabContent.getChildren().add(tableView);
         HBox.setHgrow(tableView, Priority.ALWAYS);
 
+        // Sets the currently-selected TableView to this object
+        currentTableView = tableView;
+
         // Add the info for this Pay Period to the appropriate area
         // Only need to add these labels once; the value of the labels will change on
         // Tab change
@@ -359,12 +364,10 @@ public class ExpensesPageController extends FXMLControllerTemplate {
             // Only show expenses that are of type "Expense" or "Income"
             if (expense.getExpenseType().equals(ExpenseType.EXPENSE)
                     || expense.getExpenseType().equals(ExpenseType.INCOME)) {
-                tableView.getItems().add(expense);
+                // tableView.getItems().add(expense);
+                addExpenseToTable(expense);
             }
         }
-
-        // Sets the currently-selected TableView to this object
-        currentTableView = tableView;
 
         newTab.setContent(tabContent);
 
@@ -428,6 +431,35 @@ public class ExpensesPageController extends FXMLControllerTemplate {
      */
     public void addExpenseToTable(Expense expense) {
         currentTableView.getItems().add(expense);
+        autoResizeColumns(currentTableView);
+    }
+
+    /**
+     * Resizes the columns in a given TableView based on cell text size
+     * 
+     * @param table - the TableView whose columns will be resized
+     */
+    public static void autoResizeColumns(TableView<?> table) {
+        // Set the right policy
+        table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        table.getColumns().stream().forEach((column) -> {
+            // Minimal width = columnheader
+            Text t = new Text(column.getText());
+            double max = t.getLayoutBounds().getWidth();
+            for (int i = 0; i < table.getItems().size(); i++) {
+                // cell must not be empty
+                if (column.getCellData(i) != null) {
+                    t = new Text(column.getCellData(i).toString());
+                    double calcwidth = t.getLayoutBounds().getWidth();
+                    // remember new max-width
+                    if (calcwidth > max) {
+                        max = calcwidth;
+                    }
+                }
+            }
+            // set the new max-widht with some extra space
+            column.setPrefWidth(max + 10.0d);
+        });
     }
 
     /**
@@ -460,7 +492,8 @@ public class ExpensesPageController extends FXMLControllerTemplate {
 
     public void updateSelectedExpense(Expense updatedExpense) {
         currentTableView.getSelectionModel().getSelectedItem().setExpenseName(updatedExpense.getExpenseName());
-        currentTableView.getSelectionModel().getSelectedItem().setCurrentAmountSpent(updatedExpense.getCurrentAmountSpent());
+        currentTableView.getSelectionModel().getSelectedItem()
+                .setCurrentAmountSpent(updatedExpense.getCurrentAmountSpent());
         currentTableView.getSelectionModel().getSelectedItem().setSpendingLimit(updatedExpense.getSpendingLimit());
 
         currentTableView.refresh();
@@ -478,10 +511,18 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     private void setPayPeriodFreqOnClick() {
         openPopup(FXMLFilenames.PAY_PERIOD_FREQUENCY_SELECTION_POPUP);
 
-        // Updates the Tab for the current Pay Period (whether it was updated or not)
-        payPeriodTabPane.getTabs().removeFirst();
-        addPayPeriodTab(payPeriodController.getCurrentPayPeriod());
-        sortPayPeriodTabs();
+        PayPeriodFrequencySelectionPopupController payPeriodPopupController = (PayPeriodFrequencySelectionPopupController) FXMLHandler
+                .getFxmlController(FXMLFilenames.PAY_PERIOD_FREQUENCY_SELECTION_POPUP);
+
+        if (payPeriodPopupController.getSubmitSuccess().equals(Boolean.TRUE)) {
+            // Updates the Tab for the current Pay Period (whether it was updated or not)
+            payPeriodTabPane.getTabs().removeFirst();
+            addPayPeriodTab(payPeriodController.getCurrentPayPeriod());
+            sortPayPeriodTabs();
+
+            // Reset the value for the next time the popup is opened
+            payPeriodPopupController.setSubmitSuccess(false);
+        }
     }
 
     @FXML
