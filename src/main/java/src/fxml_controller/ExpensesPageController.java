@@ -17,8 +17,10 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -395,6 +397,38 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         if (showCurrentAmountSpent.equals(Boolean.TRUE)) {
             TableColumn<Expense, Double> totalSpentColumn = new TableColumn<>("Total Spent");
             totalSpentColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmountSpent"));
+
+            // Make changes based on cell value
+            totalSpentColumn.setCellFactory(_ -> new TableCell<Expense, Double>() {
+                @Override
+                protected void updateItem(Double item, boolean empty) {
+                    // Calls the super of this method so the item is modified normally
+                    super.updateItem(item, empty);
+
+                    // Set the text of the cell to the value of the cell
+                    setText(empty ? "" : getItem().toString());
+
+                    TableRow<Expense> currentRow = getTableRow();
+
+                    // Modify row color based on certain criteria
+                    if (!isEmpty()) {
+                        if (currentRow.getItem().getExpenseType() == ExpenseType.INCOME) {
+                            currentRow.setStyle("-fx-background-color:lightgreen");
+
+                            // Amount spent is GREATER THAN the given limit
+                        } else if (currentRow.getItem().getCurrentAmountSpent() > currentRow.getItem()
+                                .getSpendingLimit()) {
+                            currentRow.setStyle("-fx-background-color:lightcoral");
+
+                            // Amount spent is APPROACHING the given limit
+                        } else if (currentRow.getItem()
+                                .getCurrentAmountSpent() > (currentRow.getItem().getSpendingLimit() * 0.75)) {
+                            currentRow.setStyle("-fx-background-color:orange");
+                        }
+                    }
+                }
+            });
+
             tableView.getColumns().add(totalSpentColumn);
         }
 
