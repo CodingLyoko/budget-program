@@ -422,7 +422,9 @@ public class ExpensesPageController extends FXMLControllerTemplate {
 
                             // Amount spent is APPROACHING the given limit
                         } else if (currentRow.getItem()
-                                .getCurrentAmountSpent() > (currentRow.getItem().getSpendingLimit() * 0.75)) {
+                                .getCurrentAmountSpent() > (currentRow.getItem().getSpendingLimit() * 0.75)
+                                && !currentRow.getItem().getCurrentAmountSpent()
+                                        .equals(currentRow.getItem().getSpendingLimit())) {
                             currentRow.setStyle("-fx-background-color:orange");
                         }
                     }
