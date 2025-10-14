@@ -394,45 +394,11 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         expenseNameColumn.setCellValueFactory(new PropertyValueFactory<>("expenseName"));
         tableView.getColumns().add(expenseNameColumn);
 
+        TableColumn<Expense, Double> totalSpentColumn = new TableColumn<>("Total Spent");
         if (showCurrentAmountSpent.equals(Boolean.TRUE)) {
-            TableColumn<Expense, Double> totalSpentColumn = new TableColumn<>("Total Spent");
-            totalSpentColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmountSpent"));
-
-            // Make changes based on cell value
-            totalSpentColumn.setCellFactory(_ -> new TableCell<Expense, Double>() {
-                @Override
-                protected void updateItem(Double item, boolean empty) {
-                    // Calls the super of this method so the item is modified normally
-                    super.updateItem(item, empty);
-
-                    // Set the text of the cell to the value of the cell
-                    setText(empty ? "" : getItem().toString());
-
-                    TableRow<Expense> currentRow = getTableRow();
-
-                    // Modify row color based on certain criteria
-                    if (!isEmpty()) {
-                        if (currentRow.getItem().getExpenseType() == ExpenseType.INCOME) {
-                            currentRow.setStyle("-fx-background-color:lightgreen");
-
-                            // Amount spent is GREATER THAN the given limit
-                        } else if (currentRow.getItem().getCurrentAmountSpent() > currentRow.getItem()
-                                .getSpendingLimit()) {
-                            currentRow.setStyle("-fx-background-color:lightcoral");
-
-                            // Amount spent is APPROACHING the given limit
-                        } else if (currentRow.getItem()
-                                .getCurrentAmountSpent() > (currentRow.getItem().getSpendingLimit() * 0.75)
-                                && !currentRow.getItem().getCurrentAmountSpent()
-                                        .equals(currentRow.getItem().getSpendingLimit())) {
-                            currentRow.setStyle("-fx-background-color:orange");
-                        }
-                    }
-                }
-            });
-
-            tableView.getColumns().add(totalSpentColumn);
+            configureTotalSpentColumn(totalSpentColumn);
         }
+        tableView.getColumns().add(totalSpentColumn);
 
         TableColumn<Expense, Double> spendingLimitColumn = new TableColumn<>("Spending Limit");
         spendingLimitColumn.setCellValueFactory(new PropertyValueFactory<>("spendingLimit"));
@@ -458,6 +424,38 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         });
 
         return tableView;
+    }
+
+    private void configureTotalSpentColumn(TableColumn<Expense, Double> totalSpentColumn) {
+
+        totalSpentColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmountSpent"));
+
+        // Make changes based on cell value
+        totalSpentColumn.setCellFactory(_ -> new TableCell<Expense, Double>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+
+                // Calls the super of this method so the item is modified normally
+                super.updateItem(item, empty);
+
+                // Set the text of the cell to the value of the cell
+                setText(empty ? "" : getItem().toString());
+
+                TableRow<Expense> currentRow = getTableRow();
+
+                // Modify row color based on certain criteria
+                if (!isEmpty()) {
+                    System.out.println("Current Expense Name: " + currentRow.getItem().getExpenseName());
+                    if (currentRow.getItem().getExpenseType() == ExpenseType.INCOME) {
+                        currentRow.setStyle("-fx-background-color:lightgreen");
+
+                        // Amount spent is GREATER THAN the given limit
+                    } else if (currentRow.getItem().getCurrentAmountSpent() > currentRow.getItem().getSpendingLimit()) {
+                        currentRow.setStyle("-fx-background-color:lightcoral");
+                    }
+                }
+            }
+        });
     }
 
     /**
