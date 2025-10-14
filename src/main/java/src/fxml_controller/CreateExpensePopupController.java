@@ -48,9 +48,20 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
     }
 
     /**
+     * Configures the layout/options of the popup based on the ExpenseType of the
+     * Expense being created.
+     * 
+     * @param expenseType - the Expense Type of the expense being created
+     */
+    public void configurePopup(ExpenseType expenseType) {
+        setExpenseTypes(expenseType);
+        updateSpendingLimitLabel(expenseType);
+    }
+
+    /**
      * Populates the options for the Expense Type input field.
      */
-    public void setExpenseTypes(ExpenseType expenseType) {
+    private void setExpenseTypes(ExpenseType expenseType) {
 
         // Clears any previous options
         expenseTypeInput.getItems().clear();
@@ -66,8 +77,6 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
 
         // Sets the first option as the default value
         expenseTypeInput.setValue(expenseTypeInput.getItems().get(0));
-
-        updateSpendingLimitLabel(expenseType);
     }
 
     /**
@@ -117,6 +126,7 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
 
             if (newValue != null) {
                 updateSpendingLimitLabel(newValue);
+                setAlreadyPaidCheckboxVisible(newValue);
             }
         });
     }
@@ -141,6 +151,24 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
             if (value.isEmpty()) {
                 submitButton.setDisable(true);
             }
+        }
+    }
+
+    /**
+     * Sets the visibility of the "Already Paid" checkbox based on the ExpenseType
+     * of the expense being created
+     * 
+     * @param expenseType - the Expense Type of the expense being created
+     */
+    private void setAlreadyPaidCheckboxVisible(ExpenseType expenseType) {
+
+        // Unselects and hides the checkbox
+        alreadyPaidCheckBox.setSelected(false);
+        alreadyPaidCheckBox.setVisible(false);
+
+        // Only show the checkbox if creating an Expense of type "EXPENSE"
+        if (expenseType.equals(ExpenseType.EXPENSE)) {
+            alreadyPaidCheckBox.setVisible(true);
         }
     }
 

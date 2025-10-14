@@ -299,7 +299,6 @@ public class ExpensesPageController extends FXMLControllerTemplate {
 
         // Add Expenses to the TableView for the given ExpenseType
         for (Expense expense : expenseController.getExpensesByExpenseType(expenseType)) {
-            // tableView.getItems().add(expense);
             addExpenseToTable(expense);
         }
 
@@ -393,19 +392,19 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         expenseNameColumn.setCellValueFactory(new PropertyValueFactory<>("expenseName"));
         tableView.getColumns().add(expenseNameColumn);
 
-        TableColumn<Expense, Double> totalSpentColumn = new TableColumn<>("Total Spent");
         if (showCurrentAmountSpent.equals(Boolean.TRUE)) {
+            TableColumn<Expense, Double> totalSpentColumn = new TableColumn<>("Total Spent");
             configureTotalSpentColumn(totalSpentColumn);
+            tableView.getColumns().add(totalSpentColumn);
         }
-        tableView.getColumns().add(totalSpentColumn);
 
         TableColumn<Expense, Double> spendingLimitColumn = new TableColumn<>("Spending Limit");
         spendingLimitColumn.setCellValueFactory(new PropertyValueFactory<>("spendingLimit"));
         tableView.getColumns().add(spendingLimitColumn);
 
-        TableColumn<Expense, Double> expenseTypeColumn = new TableColumn<>("Expense Type");
+        /*TableColumn<Expense, Double> expenseTypeColumn = new TableColumn<>("Expense Type");
         expenseTypeColumn.setCellValueFactory(new PropertyValueFactory<>("expenseType"));
-        tableView.getColumns().add(expenseTypeColumn);
+        tableView.getColumns().add(expenseTypeColumn);*/
 
         // Adds a listener to enable/disable the Expense modification buttons based on
         // the selection of an Expense from the TableView
@@ -581,7 +580,7 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         // Sets the options for the ExpenseType input based on the currently-selected
         // Expense Type tab
         ((CreateExpensePopupController) FXMLHandler.getFxmlController(FXMLFilenames.CREATE_EXPENSE_POPUP))
-                .setExpenseTypes((ExpenseType) currentSelectedExpenseTab.getUserData());
+                .configurePopup((ExpenseType) currentSelectedExpenseTab.getUserData());
 
         openPopup(FXMLFilenames.CREATE_EXPENSE_POPUP);
 
