@@ -366,7 +366,6 @@ public class ExpensesPageController extends FXMLControllerTemplate {
             // Only show expenses that are of type "Expense" or "Income"
             if (expense.getExpenseType().equals(ExpenseType.EXPENSE)
                     || expense.getExpenseType().equals(ExpenseType.INCOME)) {
-                // tableView.getItems().add(expense);
                 addExpenseToTable(expense);
             }
         }
@@ -421,6 +420,17 @@ public class ExpensesPageController extends FXMLControllerTemplate {
                 deleteExpense.setDisable(false);
                 editExpense.setDisable(false);
             }
+        });
+
+        // Opens the edit popup when double-clicking an expense
+        tableView.setRowFactory(_ -> {
+            TableRow<Expense> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    editExpenseOnClick();
+                }
+            });
+            return row;
         });
 
         return tableView;
