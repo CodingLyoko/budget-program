@@ -99,7 +99,8 @@ public class ExpenseService extends ServiceTemplate {
                         AppUserHandler
                                 .updateAvailableFunds(oldExpense.getSpendingLimit() - expense.getCurrentAmountSpent());
                     } else if (expense.getSpendingLimit() > oldExpense.getCurrentAmountSpent()) {
-                        AppUserHandler.updateAvailableFunds(oldExpense.getCurrentAmountSpent() - expense.getSpendingLimit());
+                        AppUserHandler
+                                .updateAvailableFunds(oldExpense.getCurrentAmountSpent() - expense.getSpendingLimit());
                     } else {
                         AppUserHandler.updateAvailableFunds(
                                 oldExpense.getCurrentAmountSpent() - expense.getCurrentAmountSpent());
@@ -131,6 +132,36 @@ public class ExpenseService extends ServiceTemplate {
         }
 
         return expense.getId();
+    }
+
+    public Boolean updateSpendingLimitsOnNewPayPeriodCreation()
+            throws SQLException, InstantiationException, IllegalAccessException, IllegalArgumentException,
+            InvocationTargetException, NoSuchMethodException, SecurityException {
+
+        connectToDatabase();
+
+        ResultSet resultSet = getQueryResults("SELECT * FROM " + TABLE_NAME
+                + " WHERE pay_period IN (SELECT id FROM pay_period WHERE is_current = true)");
+
+        List<Expense> expensesInOldPayPeriod = getMultipleEntries(Expense.class, resultSet);
+
+        closeDatabaseConnections();
+
+        // Sets the Spending Limit for each Expense in the (soon to be) previous pay
+        // period equal to the Current Amount Spent (if the current amount spent is LESS
+        // THAN the spending limit). This is because we want to free up any funds
+        // currently allocated but not utilized for that pay period.
+        for (Expense expense : expensesInOldPayPeriod) {
+            if (expense.getExpenseType().equals(ExpenseType.EXPENSE)
+                    && expense.getSpendingLimit() > expense.getCurrentAmountSpent()) {
+
+                expense.setSpendingLimit(expense.getCurrentAmountSpent());
+
+                updateExpense(expense);
+            }
+        }
+
+        return true;
     }
 
     public UUID deleteExpense(Expense expense) throws SQLException, IllegalAccessException, InvocationTargetException,

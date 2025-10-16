@@ -36,10 +36,13 @@ public class PayPeriodFrequencySelectionPopupController extends FXMLControllerTe
     private void submitButtonOnClick(Event e) {
         AppUserHandler.updatePayPeriodFreq(payPeriodFreqChoiceBoxInput.getValue());
 
-        PayPeriod currentPayPeriod = payPeriodController.getCurrentPayPeriod();
-        currentPayPeriod.setEndDate(PayPeriodFrequency.getEndDate(currentPayPeriod.getStartDate()));
+        // Checks if there are any pay periods to update
+        if (payPeriodController.getNumPayPeriods() != 0) {
+            PayPeriod currentPayPeriod = payPeriodController.getCurrentPayPeriod();
+            currentPayPeriod.setEndDate(PayPeriodFrequency.getEndDate(currentPayPeriod.getStartDate()));
 
-        payPeriodController.udpateCurrentPayPeriod(currentPayPeriod);
+            payPeriodController.udpateCurrentPayPeriod(currentPayPeriod);
+        }
 
         submitSuccess = true;
 

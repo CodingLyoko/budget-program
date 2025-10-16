@@ -90,6 +90,23 @@ public class ExpenseController extends ControllerTemplate {
         return result;
     }
 
+    public Boolean updateSpendingLimitsOnNewPayPeriodCreation() {
+
+        Boolean result = false;
+
+        try {
+            result = expenseService.updateSpendingLimitsOnNewPayPeriodCreation();
+
+            Logger.info("Successfully updated Expenses.");
+        } catch (SQLException sqle) {
+            Logger.error(SQL_ERROR_TEXT, sqle.getMessage());
+        } catch (Exception e) {
+            Logger.error(GENERAL_ERROR_TEXT, e.getMessage());
+        }
+
+        return result;
+    }
+
     public UUID deleteExpense(Expense expense) {
 
         UUID result = null;

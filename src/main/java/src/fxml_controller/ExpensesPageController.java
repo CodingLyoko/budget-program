@@ -224,6 +224,12 @@ public class ExpensesPageController extends FXMLControllerTemplate {
                     newEndDate = PayPeriodFrequency.getEndDate(newEndDate);
                 }
 
+                // Updates the spending limits of every Expense in the previous pay period to
+                // reflect the current amount spent for that Expense
+                expenseController.updateSpendingLimitsOnNewPayPeriodCreation();
+
+                updateFundingLabels();
+
                 // Creates a Pay Period that contains the current date within it
                 payPeriodController.createPayPeriod(newStartDate);
             }
@@ -402,10 +408,6 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         spendingLimitColumn.setCellValueFactory(new PropertyValueFactory<>("spendingLimit"));
         tableView.getColumns().add(spendingLimitColumn);
 
-        /*TableColumn<Expense, Double> expenseTypeColumn = new TableColumn<>("Expense Type");
-        expenseTypeColumn.setCellValueFactory(new PropertyValueFactory<>("expenseType"));
-        tableView.getColumns().add(expenseTypeColumn);*/
-
         // Adds a listener to enable/disable the Expense modification buttons based on
         // the selection of an Expense from the TableView
         tableView.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
@@ -454,7 +456,6 @@ public class ExpensesPageController extends FXMLControllerTemplate {
 
                 // Modify row color based on certain criteria
                 if (!isEmpty()) {
-                    System.out.println("Current Expense Name: " + currentRow.getItem().getExpenseName());
                     if (currentRow.getItem().getExpenseType() == ExpenseType.INCOME) {
                         currentRow.setStyle("-fx-background-color:lightgreen");
 
@@ -485,7 +486,7 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     public static void autoResizeColumns(TableView<?> table) {
         // Set the right policy
         table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-        table.getColumns().stream().forEach((column) -> {
+        table.getColumns().stream().forEach(column -> {
             // Minimal width = columnheader
             Text t = new Text(column.getText());
             double max = t.getLayoutBounds().getWidth();
@@ -558,10 +559,15 @@ public class ExpensesPageController extends FXMLControllerTemplate {
                 .getFxmlController(FXMLFilenames.PAY_PERIOD_FREQUENCY_SELECTION_POPUP);
 
         if (payPeriodPopupController.getSubmitSuccess().equals(Boolean.TRUE)) {
-            // Updates the Tab for the current Pay Period (whether it was updated or not)
-            payPeriodTabPane.getTabs().removeFirst();
-            addPayPeriodTab(payPeriodController.getCurrentPayPeriod());
-            sortPayPeriodTabs();
+
+            // Checks if there are Pay Periods to update
+            if (payPeriodController.getNumPayPeriods() != 0) {
+
+                // Updates the Tab for the current Pay Period (whether it was updated or not)
+                payPeriodTabPane.getTabs().removeFirst();
+                addPayPeriodTab(payPeriodController.getCurrentPayPeriod());
+                sortPayPeriodTabs();
+            }
 
             // Reset the value for the next time the popup is opened
             payPeriodPopupController.setSubmitSuccess(false);
