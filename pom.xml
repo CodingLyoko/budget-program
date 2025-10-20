@@ -4,14 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>src</groupId>
     <artifactId>Budget-Program</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
 
         <!--===============VERSION_VARIABLES===============-->
-        <openJFXVersion>24.0.1</openJFXVersion>
+        <openJFXVersion>25-ea+29</openJFXVersion>
         <lombokVersion>1.18.38</lombokVersion>
         <h2Version>2.3.232</h2Version>
         <tinylogVersion>2.8.0-M1</tinylogVersion>

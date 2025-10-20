@@ -13,6 +13,7 @@ import javafx.geometry.Side;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -78,11 +79,11 @@ public class ExpensesPageController extends FXMLControllerTemplate {
 
     /********** BOTTOM PANEL **********/
     @FXML
-    private Button addExpense;
+    private Button addExpenseButton;
     @FXML
-    private Button editExpense;
+    private MenuButton editExpenseMenuButton;
     @FXML
-    private Button deleteExpense;
+    private Button deleteExpenseButton;
 
     @FXML
     public void initialize() {
@@ -174,14 +175,14 @@ public class ExpensesPageController extends FXMLControllerTemplate {
             currentTableView.getSelectionModel().clearSelection();
 
             // Disable the button by default
-            addExpense.setDisable(true);
+            addExpenseButton.setDisable(true);
 
             if (newValue != null
                     && ((HBox) newValue.getContent()).getChildren().get(0).getClass().equals(TableView.class)) {
                 currentTableView = ((TableView<Expense>) ((HBox) newValue.getContent()).getChildren().get(0));
 
                 // If a TableView exists, enable the button
-                addExpense.setDisable(false);
+                addExpenseButton.setDisable(false);
 
                 // Display info about the given Pay Period
                 ((Label) payPeriodInfoVBox.getChildren().get(0)).setText(
@@ -246,14 +247,14 @@ public class ExpensesPageController extends FXMLControllerTemplate {
             currentTableView.getSelectionModel().clearSelection();
 
             // Disable the button by default
-            addExpense.setDisable(true);
+            addExpenseButton.setDisable(true);
 
             // Switching to ExpenseType tab that is NOT Expense
             if (newValue != null && newValue.getContent().getClass().equals(HBox.class)) {
                 currentTableView = ((TableView<Expense>) ((HBox) newValue.getContent()).getChildren().get(0));
 
                 // If a TableView exists, enable the button
-                addExpense.setDisable(false);
+                addExpenseButton.setDisable(false);
 
                 // Hides Pay Period specific information
                 infoVBox.getChildren().getLast().setVisible(false);
@@ -266,7 +267,7 @@ public class ExpensesPageController extends FXMLControllerTemplate {
                         .getSelectedItem().getContent()).getChildren().get(0));
 
                 // If a TableView exists, enable the button
-                addExpense.setDisable(false);
+                addExpenseButton.setDisable(false);
 
                 // Shows Pay Period specific information for this ExpenseType tab
                 infoVBox.getChildren().getLast().setVisible(true);
@@ -413,13 +414,13 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         tableView.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
 
             // Disable the buttons by default
-            deleteExpense.setDisable(true);
-            editExpense.setDisable(true);
+            deleteExpenseButton.setDisable(true);
+            editExpenseMenuButton.setDisable(true);
 
             // If an Expense is selected, enable the buttons
             if (newValue != null) {
-                deleteExpense.setDisable(false);
-                editExpense.setDisable(false);
+                deleteExpenseButton.setDisable(false);
+                editExpenseMenuButton.setDisable(false);
             }
         });
 
@@ -437,6 +438,12 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         return tableView;
     }
 
+    /**
+     * Changes the background color of the cells in the column based on the cell's
+     * value.
+     * 
+     * @param totalSpentColumn - the column to configure
+     */
     private void configureTotalSpentColumn(TableColumn<Expense, Double> totalSpentColumn) {
 
         totalSpentColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmountSpent"));
@@ -534,6 +541,12 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         setAvailableFundsLabel();
     }
 
+    /**
+     * Updates an Expense in the TableView and refreshes the TableView (so the
+     * changes to the Expense are visible)
+     * 
+     * @param updatedExpense - the Expense that is being updated
+     */
     public void updateSelectedExpense(Expense updatedExpense) {
         currentTableView.getSelectionModel().getSelectedItem().setExpenseName(updatedExpense.getExpenseName());
         currentTableView.getSelectionModel().getSelectedItem()
@@ -545,6 +558,10 @@ public class ExpensesPageController extends FXMLControllerTemplate {
 
     /****************************** FXML FUNCTIONS ******************************/
     @FXML
+    /**
+     * Opens a popup to update the total funds value. Once the popup closes, the
+     * relevant funding labels are updated.
+     */
     private void setTotalFundsOnClick() {
         openPopup(FXMLFilenames.SET_TOTAL_FUNDS_POPUP);
         setTotalFundsLabel();
@@ -552,6 +569,11 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     }
 
     @FXML
+    /**
+     * Opens a popup to set the frequency that Pay Periods occur. Once the popup
+     * closes, the end date of the current Pay Period is recalculated using the new
+     * value selected in the popup.
+     */
     private void setPayPeriodFreqOnClick() {
         openPopup(FXMLFilenames.PAY_PERIOD_FREQUENCY_SELECTION_POPUP);
 
@@ -575,12 +597,22 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     }
 
     @FXML
+    /**
+     * Opens a popup to create a new Pay Period.
+     * 
+     * NOTE: This is only done ONCE (when there are no Pay Periods); each subsequent
+     * Pay Period is created automatically.
+     */
     private void createPayPeriodOnClick() {
         openPopup(FXMLFilenames.CREATE_PAY_PERIOD_POPUP);
         createPayPeriodTabs(expenseYearInput.getValue());
     }
 
     @FXML
+    /**
+     * Opens a popup to create a new Expense. Once the popup is closed, the funding
+     * labels are updated.
+     */
     private void addExpenseOnClick() {
 
         // Sets the options for the ExpenseType input based on the currently-selected
@@ -594,6 +626,10 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     }
 
     @FXML
+    /**
+     * Opens a popup to allow editing of the currently-selected Expense. Once the
+     * popup is closed, the funding labels are updated.
+     */
     private void editExpenseOnClick() {
 
         UpdateExpensePopupController expensePopupController = ((UpdateExpensePopupController) FXMLHandler
@@ -615,6 +651,28 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     }
 
     @FXML
+    /**
+     * Opens a popup to modify the Current Amount Spent value of the
+     * currently-selected Expense.
+     */
+    private void addSpentAmountOnClick() {
+
+        AddAmountSpentPopupController addAmountSpentPopupController = ((AddAmountSpentPopupController) FXMLHandler
+                .getFxmlController(FXMLFilenames.ADD_AMOUNT_SPENT_POPUP));
+
+        // Send over the current expense from the current TableView
+        addAmountSpentPopupController.getExpenseToUpdate(currentTableView.getSelectionModel().getSelectedItem());
+
+        openPopup(FXMLFilenames.ADD_AMOUNT_SPENT_POPUP);
+
+        updateFundingLabels();
+    }
+
+    @FXML
+    /**
+     * Deletes the currently-selected Expense. Once the popu is clsoed, the Expense
+     * is removed from the TableView, and the funding labels are updated.
+     */
     private void deleteExpenseOnClick() {
 
         Expense selectedExpense = currentTableView.getSelectionModel().getSelectedItem();

@@ -6,9 +6,12 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -48,11 +51,37 @@
             </VBox>
          </top>
          <bottom>
-            <HBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+            <HBox alignment="CENTER" spacing="25.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button fx:id="addExpense" mnemonicParsing="false" onAction="#addExpenseOnClick" text="Add Expense" />
-                  <Button fx:id="editExpense" disable="true" mnemonicParsing="false" onAction="#editExpenseOnClick" text="Edit Expense" />
-                  <Button fx:id="deleteExpense" disable="true" mnemonicParsing="false" onAction="#deleteExpenseOnClick" text="Delete Expense" />
+                  <Button fx:id="addExpenseButton" mnemonicParsing="false" onAction="#addExpenseOnClick">
+                     <graphic>
+                        <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/icon_add.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></Button>
+                  <MenuButton fx:id="editExpenseMenuButton" disable="true" mnemonicParsing="false">
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#editExpenseOnClick" text="Edit Expense" />
+                      <MenuItem mnemonicParsing="false" onAction="#addSpentAmountOnClick" text="Add Amount to Current Spent" />
+                    </items>
+                     <graphic>
+                        <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/icon_edit.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </MenuButton>
+                  <Button fx:id="deleteExpenseButton" disable="true" mnemonicParsing="false" onAction="#deleteExpenseOnClick" prefWidth="48.0">
+                     <graphic>
+                        <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/icon_delete.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></Button>
                </children>
                <padding>
                   <Insets bottom="15.0" top="15.0" />
