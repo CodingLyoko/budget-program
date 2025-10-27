@@ -13,3 +13,6 @@
 - Fix bug where updating pay period frequency prior to having a pay period caused an error
 - Update expense page button icons
 - Add feature to allow values to be added to the Current Amount Spent of an Expense
+
+## Version 1.1.1
+- Fix bug where TableView row would have incorrect background color
