@@ -19,3 +19,6 @@
 
 ## Version 1.2.1
 - Add ability to select previous Expense information when creating a new Expense
+
+## Version 1.2.2
+- Fix bug where ExpenseType is updated to an un-selectable option when loading previous Expense data during Expense creation

@@ -133,7 +133,8 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
             // isn't equal to the current input, we refilter the list.
             if (selected == null || !selected.equals(editor.getText())) {
 
-                // Filters both the selectable Expense name options AS WELL AS the related Expense data
+                // Filters both the selectable Expense name options AS WELL AS the related
+                // Expense data
                 filteredExpenses
                         .setPredicate(item -> item.getExpenseName().toUpperCase().startsWith(newValue.toUpperCase()));
                 filteredExpenseNames.setPredicate(item -> item.toUpperCase().startsWith(newValue.toUpperCase()));
@@ -153,7 +154,11 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
                         .get(expenseNameInput.getSelectionModel().getSelectedIndex());
 
                 spendingLimitInput.setText(selectedExpense.getSpendingLimit().toString());
-                expenseTypeInput.getSelectionModel().select(selectedExpense.getExpenseType());
+
+                // Only update ExpenseType if the selected value is a selectable option
+                if (expenseTypeInput.getItems().contains(selectedExpense.getExpenseType())) {
+                    expenseTypeInput.getSelectionModel().select(selectedExpense.getExpenseType());
+                }
             }
 
             checkInputsCompleted();
