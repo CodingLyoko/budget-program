@@ -1,13 +1,18 @@
 package src.fxml_controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
@@ -24,8 +29,13 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
 
     Map<String, String> inputValues = new HashMap<>();
 
+    ObservableList<Expense> unfilteredExpenses;
+    FilteredList<Expense> filteredExpenses;
+    ObservableList<String> unfilteredExpenseNames = FXCollections.observableArrayList();
+    FilteredList<String> filteredExpenseNames;
+
     @FXML
-    private TextField expenseNameInput;
+    private ComboBox<String> expenseNameInput;
 
     @FXML
     private Label spendingLimitLabel;
@@ -45,6 +55,7 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
     public void initialize() {
         allowOnlyDoublesInTextField(spendingLimitInput);
         setInputListeners();
+        populateExpenseOptions();
     }
 
     /**
@@ -104,14 +115,47 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
     }
 
     /**
-     * Adds listeners to each required input field to check if they are are
-     * complete.
+     * Adds listeners to each required input field.
      */
     private void setInputListeners() {
         instantiateInputValueMap();
 
-        expenseNameInput.textProperty().addListener((_, _, newValue) -> {
+        // Filter selectable options based on current input text
+        expenseNameInput.getEditor().textProperty().addListener((_, _, newValue) -> {
+
+            // Maps the new value in the input field
             inputValues.put("expenseNameInput", newValue);
+
+            final TextField editor = expenseNameInput.getEditor();
+            final String selected = expenseNameInput.getSelectionModel().getSelectedItem();
+
+            // If no item in the list is selected or the selected item
+            // isn't equal to the current input, we refilter the list.
+            if (selected == null || !selected.equals(editor.getText())) {
+
+                // Filters both the selectable Expense name options AS WELL AS the related Expense data
+                filteredExpenses
+                        .setPredicate(item -> item.getExpenseName().toUpperCase().startsWith(newValue.toUpperCase()));
+                filteredExpenseNames.setPredicate(item -> item.toUpperCase().startsWith(newValue.toUpperCase()));
+            }
+
+            expenseNameInput.setItems(filteredExpenseNames);
+            expenseNameInput.setUserData(filteredExpenses);
+
+            checkInputsCompleted();
+        });
+
+        // If the user selected an existing Expense, populate the other input feilds
+        // with that Expense's data
+        expenseNameInput.getSelectionModel().selectedItemProperty().addListener((_, _, _) -> {
+            if (expenseNameInput.getSelectionModel().getSelectedIndex() >= 0) {
+                Expense selectedExpense = ((List<Expense>) expenseNameInput.getUserData())
+                        .get(expenseNameInput.getSelectionModel().getSelectedIndex());
+
+                spendingLimitInput.setText(selectedExpense.getSpendingLimit().toString());
+                expenseTypeInput.getSelectionModel().select(selectedExpense.getExpenseType());
+            }
+
             checkInputsCompleted();
         });
 
@@ -148,7 +192,7 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
     private void checkInputsCompleted() {
         submitButton.setDisable(false);
         for (String value : inputValues.values()) {
-            if (value.isEmpty()) {
+            if (value == null || value.isEmpty()) {
                 submitButton.setDisable(true);
             }
         }
@@ -172,6 +216,24 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
         }
     }
 
+    private void populateExpenseOptions() {
+
+        // Get Expenses/Expense names and store them in lists
+        // FilteredLists will be used later (when the user is typing in an Expense name)
+        unfilteredExpenses = FXCollections.observableArrayList(expenseController.getAllEntries(Expense.class));
+        filteredExpenses = new FilteredList<>(unfilteredExpenses);
+
+        for (Expense expense : unfilteredExpenses) {
+            unfilteredExpenseNames.add(expense.getExpenseName());
+        }
+        filteredExpenseNames = new FilteredList<>(unfilteredExpenseNames);
+
+        // Sets the selectable options for the Expense names and stores the related
+        // Expense data
+        expenseNameInput.setItems(unfilteredExpenseNames);
+        expenseNameInput.setUserData(unfilteredExpenses);
+    }
+
     @FXML
     private void submitButtonOnClick(Event e) {
 
@@ -184,7 +246,7 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
 
         // Creates a new Expense object based on user input
         Expense newExpense = new Expense();
-        newExpense.setExpenseName(expenseNameInput.getText());
+        newExpense.setExpenseName(expenseNameInput.getValue());
         newExpense.setSpendingLimit(spendingLimitValue);
         newExpense.setExpenseType(expenseTypeInput.getValue());
 
@@ -214,7 +276,7 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
      * Resets the inputs to default values
      */
     private void resetInputValues() {
-        expenseNameInput.clear();
+        expenseNameInput.setValue("");
         spendingLimitInput.clear();
         alreadyPaidCheckBox.setSelected(false);
     }

@@ -16,3 +16,6 @@
 
 ## Version 1.1.1
 - Fix bug where TableView row would have incorrect background color
+
+## Version 1.2.1
+- Add ability to select previous Expense information when creating a new Expense
