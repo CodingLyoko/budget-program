@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,6 +35,9 @@ public class ConnectH2 {
         Logger.info("About to execute SQL scripts...");
 
         String[] sqlScriptFilenames = getSqlScriptFilenames();
+        
+        // Sorts array so that oldest scripts are run first
+        Arrays.sort(sqlScriptFilenames);
 
         try (Connection connection = DriverManager.getConnection(JDBC_URL);
                 Statement statement = connection.createStatement();) {
