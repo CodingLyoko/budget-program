@@ -1,0 +1,1 @@
+ALTER TABLE expense ADD IF NOT EXISTS is_favorite BOOLEAN;

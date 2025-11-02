@@ -17,6 +17,7 @@ public class Expense extends ModelTemplate {
         spendingLimit = 0.0;
         currentAmountSpent = 0.0;
         expenseType = ExpenseType.EXPENSE;
+        isFavorite = false;
     }
 
     public Expense(ResultSet resultSet) {
@@ -29,4 +30,5 @@ public class Expense extends ModelTemplate {
     private Double currentAmountSpent;
     private ExpenseType expenseType;
     private UUID payPeriod;
+    private Boolean isFavorite;
 }
