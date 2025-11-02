@@ -80,6 +80,22 @@ public class ExpenseService extends ServiceTemplate {
         return result;
     }
 
+    public List<Expense> getFavoriteExpenses() throws SQLException, InstantiationException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+
+        List<Expense> result;
+
+        connectToDatabase();
+
+        ResultSet resultSet = getQueryResults("SELECT * FROM " + TABLE_NAME + " WHERE is_favorite = TRUE;");
+
+        result = getMultipleEntries(Expense.class, resultSet);
+
+        closeDatabaseConnections();
+
+        return result;
+    }
+
     public UUID updateExpense(Expense expense) throws SQLException, InstantiationException, IllegalAccessException,
             IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 

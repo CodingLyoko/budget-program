@@ -22,3 +22,7 @@
 
 ## Version 1.2.2
 - Fix bug where ExpenseType is updated to an un-selectable option when loading previous Expense data during Expense creation
+
+## Version 1.2.3
+- Add functionality to favorite an Expense
+- Updated Expense dropdown to only include favorited Expenses

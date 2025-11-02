@@ -225,7 +225,7 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
 
         // Get Expenses/Expense names and store them in lists
         // FilteredLists will be used later (when the user is typing in an Expense name)
-        unfilteredExpenses = FXCollections.observableArrayList(expenseController.getAllEntries(Expense.class));
+        unfilteredExpenses = FXCollections.observableArrayList(expenseController.getFavoriteExpenses());
         filteredExpenses = new FilteredList<>(unfilteredExpenses);
 
         for (Expense expense : unfilteredExpenses) {
