@@ -80,8 +80,12 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     /********** BOTTOM PANEL **********/
     @FXML
     private Button addExpenseButton;
+
     @FXML
     private MenuButton editExpenseMenuButton;
+    @FXML
+    private MenuItem toggleFavoriteExpenseMenuItem;
+
     @FXML
     private Button deleteExpenseButton;
 
@@ -421,6 +425,14 @@ public class ExpensesPageController extends FXMLControllerTemplate {
             if (newValue != null) {
                 deleteExpenseButton.setDisable(false);
                 editExpenseMenuButton.setDisable(false);
+
+                // Updates the Favorites MenuItem text baed on the Favorite status of the
+                // selected Expense
+                if (newValue.getIsFavorite().equals(Boolean.TRUE)) {
+                    toggleFavoriteExpenseMenuItem.setText("Remove from Favorites");
+                } else {
+                    toggleFavoriteExpenseMenuItem.setText("Add to Favorites");
+                }
             }
         });
 
@@ -668,6 +680,28 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         openPopup(FXMLFilenames.ADD_AMOUNT_SPENT_POPUP);
 
         updateFundingLabels();
+    }
+
+    @FXML
+    /**
+     * Toggles the isFavorite value for the selected Expense
+     */
+    private void toggleIsFavorite() {
+
+        Expense selectedExpense = currentTableView.getSelectionModel().getSelectedItem();
+
+        // If the value was not set, default to change the value to TRUE
+        if (selectedExpense.getIsFavorite().equals(Boolean.TRUE)) {
+            selectedExpense.setIsFavorite(false);
+            expenseController.updateEntry(selectedExpense);
+
+            toggleFavoriteExpenseMenuItem.setText("Add from Favorites");
+        } else {
+            selectedExpense.setIsFavorite(true);
+            expenseController.updateEntry(selectedExpense);
+
+            toggleFavoriteExpenseMenuItem.setText("Remove from Favorites");
+        }
     }
 
     @FXML
