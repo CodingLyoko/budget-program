@@ -64,7 +64,7 @@
                   <MenuButton fx:id="editExpenseMenuButton" disable="true" mnemonicParsing="false">
                     <items>
                       <MenuItem mnemonicParsing="false" onAction="#editExpenseOnClick" text="Edit Expense" />
-                      <MenuItem mnemonicParsing="false" onAction="#addSpentAmountOnClick" text="Add to Current Spent Amount" />
+                      <MenuItem fx:id="addToCurrentSpentAmountMenuItem" mnemonicParsing="false" onAction="#addSpentAmountOnClick" text="Add to Current Spent Amount" />
                         <MenuItem fx:id="toggleFavoriteExpenseMenuItem" mnemonicParsing="false" onAction="#toggleIsFavorite" text="Add to Favorites" />
                     </items>
                      <graphic>

@@ -84,6 +84,8 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     @FXML
     private MenuButton editExpenseMenuButton;
     @FXML
+    private MenuItem addToCurrentSpentAmountMenuItem;
+    @FXML
     private MenuItem toggleFavoriteExpenseMenuItem;
 
     @FXML
@@ -433,6 +435,10 @@ public class ExpensesPageController extends FXMLControllerTemplate {
                 } else {
                     toggleFavoriteExpenseMenuItem.setText("Add to Favorites");
                 }
+
+                // Enables/Disables the given MenuItem based on the ExpenseType of the selected
+                // Expense
+                addToCurrentSpentAmountMenuItem.setDisable(!newValue.getExpenseType().equals(ExpenseType.EXPENSE));
             }
         });
 
