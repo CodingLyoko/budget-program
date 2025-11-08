@@ -9,6 +9,7 @@
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -28,8 +29,10 @@
                       <Menu mnemonicParsing="false" text="File">
                         <items>
                           <MenuItem fx:id="setTotalFunds" mnemonicParsing="false" onAction="#setTotalFundsOnClick" text="Set Total Funds" />
-                              <MenuItem fx:id="setPayPeriodFreq" mnemonicParsing="false" onAction="#setPayPeriodFreqOnClick" text="Set Pay Period Frequency" />
+                              <MenuItem fx:id="addToTotalFunds" mnemonicParsing="false" onAction="#addToTotalFundsOnClick" text="Add to Total Funds" />
+                              <SeparatorMenuItem mnemonicParsing="false" />
                               <MenuItem fx:id="createPayPeriod" mnemonicParsing="false" onAction="#createPayPeriodOnClick" text="Create Initial Pay Period" />
+                              <MenuItem fx:id="setPayPeriodFreq" mnemonicParsing="false" onAction="#setPayPeriodFreqOnClick" text="Set Pay Period Frequency" />
                         </items>
                       </Menu>
                       <Menu mnemonicParsing="false" text="Help">

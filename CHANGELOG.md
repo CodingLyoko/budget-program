@@ -26,3 +26,7 @@
 ## Version 1.2.3
 - Add functionality to favorite an Expense
 - Updated Expense dropdown to only include favorited Expenses
+
+## Version 1.2.4
+- Disable "Add to Current Spent Amount" for Expense Types other than EXPENSE
+- Add functionality to add to Total Funds (instead of just replacing the whole value)

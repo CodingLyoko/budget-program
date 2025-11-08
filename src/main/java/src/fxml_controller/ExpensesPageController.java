@@ -590,6 +590,17 @@ public class ExpensesPageController extends FXMLControllerTemplate {
 
     @FXML
     /**
+     * Opens a popup to add to the total funds amount. Once the popup closes, the
+     * relevant funding labels are updated.
+     */
+    private void addToTotalFundsOnClick() {
+        openPopup(FXMLFilenames.ADD_TO_TOTAL_FUNDS_POPUP);
+        setTotalFundsLabel();
+        setAvailableFundsLabel();
+    }
+
+    @FXML
+    /**
      * Opens a popup to set the frequency that Pay Periods occur. Once the popup
      * closes, the end date of the current Pay Period is recalculated using the new
      * value selected in the popup.
