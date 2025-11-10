@@ -30,3 +30,6 @@
 ## Version 1.2.4
 - Disable "Add to Current Spent Amount" for Expense Types other than EXPENSE
 - Add functionality to add to Total Funds (instead of just replacing the whole value)
+
+## Version 1.2.5
+- Add functionality to convert the ExpenseType of an Expense from "Reserved" to "Expense"

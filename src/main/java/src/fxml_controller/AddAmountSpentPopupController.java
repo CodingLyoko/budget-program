@@ -81,7 +81,7 @@ public class AddAmountSpentPopupController extends FXMLControllerTemplate {
 
         resetInputValues();
 
-        expensePageController.updateSelectedExpense(updatedExpense);
+        expensePageController.currentTableView.refresh();
 
         super.closeWindowOnClick(e);
     }

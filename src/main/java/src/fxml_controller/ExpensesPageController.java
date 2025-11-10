@@ -562,18 +562,40 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     }
 
     /**
-     * Updates an Expense in the TableView and refreshes the TableView (so the
-     * changes to the Expense are visible)
+     * Remove the given Expense from the current tab and move it to the correct
+     * ExpenseType tab
      * 
-     * @param updatedExpense - the Expense that is being updated
+     * @param expenseToMove - the Expense to be moved
      */
-    public void updateSelectedExpense(Expense updatedExpense) {
-        currentTableView.getSelectionModel().getSelectedItem().setExpenseName(updatedExpense.getExpenseName());
-        currentTableView.getSelectionModel().getSelectedItem()
-                .setCurrentAmountSpent(updatedExpense.getCurrentAmountSpent());
-        currentTableView.getSelectionModel().getSelectedItem().setSpendingLimit(updatedExpense.getSpendingLimit());
+    @SuppressWarnings("unchecked")
+    public void moveExpenseToNewTab(Expense expenseToMove) {
 
-        currentTableView.refresh();
+        // Adds the Expense to the appropriate TableView
+        // EXPENSE & INCOME: ExpenseType Tabs --> Pay Period Tabs --> HBox --> TableView
+        // SAVINGS & RESERVED: ExpenseType Tabs --> HBox --> TableView
+        switch (expenseToMove.getExpenseType()) {
+            case ExpenseType.EXPENSE:
+                ((TableView<Expense>) ((HBox) (((TabPane) (expenseTypeTabPane.getTabs().get(0).getContent()))
+                        .getTabs().getFirst()).getContent()).getChildren().get(0)).getItems().add(expenseToMove);
+                break;
+            case ExpenseType.INCOME:
+                ((TableView<Expense>) ((HBox) (((TabPane) (expenseTypeTabPane.getTabs().get(0).getContent()))
+                        .getTabs().getFirst()).getContent()).getChildren().get(0)).getItems().add(expenseToMove);
+                break;
+            case ExpenseType.SAVINGS:
+                ((TableView<Expense>) ((HBox) (expenseTypeTabPane.getTabs().get(1).getContent())).getChildren().get(0))
+                        .getItems().add(expenseToMove);
+                break;
+            case ExpenseType.RESERVED:
+                ((TableView<Expense>) ((HBox) (expenseTypeTabPane.getTabs().get(2).getContent())).getChildren().get(0))
+                        .getItems().add(expenseToMove);
+                break;
+            default:
+                break;
+        }
+
+        // Removes the Expense from the current TableView
+        currentTableView.getItems().remove(currentTableView.getSelectionModel().getSelectedIndex());
     }
 
     /****************************** FXML FUNCTIONS ******************************/

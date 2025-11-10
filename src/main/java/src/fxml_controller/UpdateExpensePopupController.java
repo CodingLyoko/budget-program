@@ -6,6 +6,7 @@ import java.util.Map;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import src.backend.controller.ExpenseController;
@@ -34,6 +35,9 @@ public class UpdateExpensePopupController extends FXMLControllerTemplate {
     private Label spendingLimitLabel;
     @FXML
     private TextField spendingLimitInput;
+
+    @FXML
+    private CheckBox updateReservedStatusCheckbox;
 
     @FXML
     private Button submitButton;
@@ -72,15 +76,25 @@ public class UpdateExpensePopupController extends FXMLControllerTemplate {
         switch (expenseType) {
             case ExpenseType.EXPENSE:
                 currentAmountSpentLabel.setVisible(true);
-                currentAmountSpentLabel.setManaged(true);
+                currentAmountSpentLabel.setManaged(true); // Updates UI to account for being visible
                 currentAmountSpentInput.setVisible(true);
                 currentAmountSpentInput.setManaged(true);
+                break;
+            case ExpenseType.RESERVED:
+                updateReservedStatusCheckbox.setVisible(true);
+                updateReservedStatusCheckbox.setManaged(true);
+                currentAmountSpentLabel.setVisible(false);
+                currentAmountSpentLabel.setManaged(false); // Updates UI to account for not being visible
+                currentAmountSpentInput.setVisible(false);
+                currentAmountSpentInput.setManaged(false);
                 break;
             default:
                 currentAmountSpentLabel.setVisible(false);
                 currentAmountSpentLabel.setManaged(false);
                 currentAmountSpentInput.setVisible(false);
                 currentAmountSpentInput.setManaged(false);
+                updateReservedStatusCheckbox.setVisible(false);
+                updateReservedStatusCheckbox.setManaged(false);
                 break;
         }
     }
@@ -144,11 +158,26 @@ public class UpdateExpensePopupController extends FXMLControllerTemplate {
         updatedExpense.setCurrentAmountSpent(Double.parseDouble(currentAmountSpentInput.getText()));
         updatedExpense.setSpendingLimit(Double.parseDouble(spendingLimitInput.getText()));
 
+        // If converting ExpenseType to "Expense", update the relevant values
+        if (updateReservedStatusCheckbox.isSelected()) {
+            updatedExpense.setExpenseType(ExpenseType.EXPENSE);
+        }
+
+        // Updates the Expense in the database 
+        // (Updates will also be reflected in the TableView)
         expenseController.updateExpense(updatedExpense);
 
         resetInputValues();
 
-        expensePageController.updateSelectedExpense(updatedExpense);
+        // Checking again so we don't execute this on every Expense update.
+        // We want this to occur AFTER the Expense has been updated in the database, in
+        // case something went wrong with that process
+        if (updateReservedStatusCheckbox.isSelected()) {
+            expensePageController.moveExpenseToNewTab(updatedExpense);
+        }
+
+        // Refreshes the view for the current TableView
+        expensePageController.currentTableView.refresh();
 
         super.closeWindowOnClick(e);
     }
