@@ -33,3 +33,7 @@
 
 ## Version 1.2.5
 - Add functionality to convert the ExpenseType of an Expense from "Reserved" to "Expense"
+
+## Version 1.3.0
+- Fixed bugs with updating ExpenseType for an Expense
+- Reworked workflow for adding Expenses to a TableView

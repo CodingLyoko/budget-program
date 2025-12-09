@@ -5,7 +5,6 @@ public enum ExpenseType {
     INCOME("Income"),
     SAVINGS("Savings"),
     RESERVED("Reserved");
-    
 
     private final String expenseTypeValue;
 

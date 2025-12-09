@@ -6,6 +6,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+
+import org.tinylog.Logger;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -117,6 +120,8 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         createPayPeriodTabs(expenseYearInput.getValue());
 
         payPeriodInfoVBox.setSpacing(10);
+
+        populateExpenseTabs();
     }
 
     private void setAvailableFundsLabel() {
@@ -310,11 +315,6 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         // Sets the currently-selected TableView to this object
         currentTableView = tableView;
 
-        // Add Expenses to the TableView for the given ExpenseType
-        for (Expense expense : expenseController.getExpensesByExpenseType(expenseType)) {
-            addExpenseToTable(expense);
-        }
-
         if (expenseType.equals(ExpenseType.EXPENSE)) {
             newTab.setContent(payPeriodTabPane);
             currentSelectedPayPeriodTab = payPeriodTabPane.getSelectionModel().getSelectedItem();
@@ -324,6 +324,30 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         }
 
         expenseTypeTabPane.getTabs().add(newTab);
+    }
+
+    /**
+     * Adds all Expenses to the expense tabs.
+     */
+    private void populateExpenseTabs() {
+
+        // Iterate through each expense tab
+        for (Tab expenseTab : expenseTypeTabPane.getTabs()) {
+
+            // Get the ExpenseType of the expense tab
+            ExpenseType currentExpenseType = (ExpenseType) expenseTab.getUserData();
+
+            // Adds every Expense of the given ExpenseType to the expense tab
+            for (Expense expense : expenseController.getExpensesByExpenseType(currentExpenseType)) {
+                addExpenseToTable(expense);
+            }
+        }
+
+        // Expenses of ExpenseType INCOME share the same tab as EXPENSE (but are not
+        // represented in the Tab itself), so these Expeneses must be explicitly added
+        for (Expense expense : expenseController.getExpensesByExpenseType(ExpenseType.INCOME)) {
+            addExpenseToTable(expense);
+        }
     }
 
     /**
@@ -359,7 +383,7 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         // Add the info for this Pay Period to the appropriate area
         // Only need to add these labels once; the value of the labels will change on
         // Tab change
-        if (payPeriodTabPane.getTabs().isEmpty()) {
+        if (payPeriodTabPane.getTabs().isEmpty() && payPeriodInfoVBox.getChildren().isEmpty()) {
 
             // Display info about the given Pay Period
             payPeriodInfoVBox.getChildren()
@@ -496,13 +520,23 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     }
 
     /**
-     * Add an Expense object to the currently-selected TableView.
+     * Add an Expense object to a TableView based on it's ExpenseType.
      * 
      * @param expense - the Expense to add
      */
-    public void addExpenseToTable(Expense expense) {
-        currentTableView.getItems().add(expense);
-        autoResizeColumns(currentTableView);
+    public synchronized void addExpenseToTable(Expense expense) {
+        addExpenseToExpenseTab(expense, Optional.empty());
+    }
+
+    /**
+     * Add an Expense object to a TableView based on the given ExpenseType.
+     * 
+     * @param expense        - the Expense to add
+     * @param tabExpenseType - the ExpenseType of the Expense tab that the Expense
+     *                       will be added to
+     */
+    public void addExpenseToTable(Expense expense, ExpenseType tabExpenseType) {
+        addExpenseToExpenseTab(expense, Optional.of(tabExpenseType));
     }
 
     /**
@@ -562,40 +596,207 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     }
 
     /**
-     * Remove the given Expense from the current tab and move it to the correct
-     * ExpenseType tab
+     * Moves an Expense from one Expense tab to another based on the current and
+     * previous ExpenseType of the given Expense.
+     * 
+     * @param expenseToMove  - the Expense to move
+     * @param oldExpenseType - the previous ExpenseType of the Expense being moved
+     */
+    public void moveExpenseToNewTab(Expense expenseToMove, ExpenseType oldExpenseType) {
+        addExpenseToTable(expenseToMove);
+        removeExpenseFromExpenseTab(expenseToMove, oldExpenseType);
+    }
+
+    /**
+     * 
      * 
      * @param expenseToMove - the Expense to be moved
      */
+    /**
+     * Add a given Expense to an Expense tab.
+     * 
+     * @param expenseToMove - the Expense to be moved
+     * @param expenseType   - if provided, moves the Expense to the corresponding
+     *                      Expense tab; else uses the current ExpenseType of the
+     *                      given Expense
+     */
     @SuppressWarnings("unchecked")
-    public void moveExpenseToNewTab(Expense expenseToMove) {
+    private void addExpenseToExpenseTab(Expense expenseToMove, Optional<ExpenseType> expenseType) {
+        try {
+            // Adds the Expense to the appropriate TableView
+            // EXPENSE & INCOME: ExpenseType Tabs --> Pay Period Tabs --> HBox --> TableView
+            // SAVINGS & RESERVED: ExpenseType Tabs --> HBox --> TableView
+            switch (expenseType.isPresent() ? expenseType.get() : expenseToMove.getExpenseType()) {
+                case ExpenseType.EXPENSE:
 
-        // Adds the Expense to the appropriate TableView
-        // EXPENSE & INCOME: ExpenseType Tabs --> Pay Period Tabs --> HBox --> TableView
-        // SAVINGS & RESERVED: ExpenseType Tabs --> HBox --> TableView
-        switch (expenseToMove.getExpenseType()) {
-            case ExpenseType.EXPENSE:
-                ((TableView<Expense>) ((HBox) (((TabPane) (expenseTypeTabPane.getTabs().get(0).getContent()))
-                        .getTabs().getFirst()).getContent()).getChildren().get(0)).getItems().add(expenseToMove);
-                break;
-            case ExpenseType.INCOME:
-                ((TableView<Expense>) ((HBox) (((TabPane) (expenseTypeTabPane.getTabs().get(0).getContent()))
-                        .getTabs().getFirst()).getContent()).getChildren().get(0)).getItems().add(expenseToMove);
-                break;
-            case ExpenseType.SAVINGS:
-                ((TableView<Expense>) ((HBox) (expenseTypeTabPane.getTabs().get(1).getContent())).getChildren().get(0))
-                        .getItems().add(expenseToMove);
-                break;
-            case ExpenseType.RESERVED:
-                ((TableView<Expense>) ((HBox) (expenseTypeTabPane.getTabs().get(2).getContent())).getChildren().get(0))
-                        .getItems().add(expenseToMove);
-                break;
-            default:
-                break;
+                    // Iterate through each PayPeriod Tab
+                    for (Tab payPeriodTab : (((TabPane) (expenseTypeTabPane.getTabs().get(0).getContent()))
+                            .getTabs())) {
+
+                        // The TableView that the expense is being added to
+                        TableView<Expense> expenseTableView = (TableView<Expense>) ((HBox) (payPeriodTab.getContent()))
+                                .getChildren().get(0);
+
+                        // If the Expense belongs to this PayPeriod, add it to the TableView of the
+                        // given PayPeriod Tab
+                        if (expenseToMove.getPayPeriod()
+                                .compareTo((((PayPeriod) payPeriodTab.getUserData()).getId())) == 0) {
+                            expenseTableView.getItems().add(expenseToMove);
+                        }
+
+                        autoResizeColumns(expenseTableView);
+                    }
+                    break;
+
+                case ExpenseType.INCOME:
+
+                    // Iterate through each PayPeriod Tab
+                    for (Tab payPeriodTab : (((TabPane) (expenseTypeTabPane.getTabs().get(0).getContent()))
+                            .getTabs())) {
+
+                        // The TableView that the expense is being added to
+                        TableView<Expense> expenseTableView = (TableView<Expense>) ((HBox) (payPeriodTab.getContent()))
+                                .getChildren().get(0);
+
+                        // If the Expense belongs to this PayPeriod, add it to the TableView of the
+                        // given PayPeriod Tab
+                        if (expenseToMove.getPayPeriod()
+                                .compareTo((((PayPeriod) payPeriodTab.getUserData()).getId())) == 0) {
+                            expenseTableView.getItems().add(expenseToMove);
+                        }
+
+                        autoResizeColumns(expenseTableView);
+                    }
+                    break;
+
+                case ExpenseType.SAVINGS:
+
+                    // The TableView that the expense is being added to
+                    TableView<Expense> savingsTableView = (TableView<Expense>) ((HBox) (expenseTypeTabPane.getTabs()
+                            .get(1).getContent())).getChildren().get(0);
+
+                    // Add the given Expense to the relevant Expense tab
+                    savingsTableView.getItems().add(expenseToMove);
+
+                    autoResizeColumns(savingsTableView);
+                    break;
+
+                case ExpenseType.RESERVED:
+
+                    // The TableView that the expense is being added to
+                    TableView<Expense> reservedTableView = (TableView<Expense>) ((HBox) (expenseTypeTabPane.getTabs()
+                            .get(2).getContent())).getChildren().get(0);
+
+                    // Add the given Expense to the relevant Expense tab
+                    reservedTableView.getItems().add(expenseToMove);
+
+                    autoResizeColumns(reservedTableView);
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            Logger.error("Error adding Expense to a Tab: {}", e.getMessage());
         }
+    }
 
-        // Removes the Expense from the current TableView
-        currentTableView.getItems().remove(currentTableView.getSelectionModel().getSelectedIndex());
+    /**
+     * Removes an Expense from it's ExpenseType tab (using the ExpenseType of the
+     * Expense to determine the Tab to remove it from).
+     * 
+     * @param expenseToRemove - the Expense to remove
+     */
+    private void removeExpenseFromExpenseTab(Expense expenseToRemove) {
+        removeExpenseFromTab(expenseToRemove, Optional.empty());
+    }
+
+    /**
+     * Removes an Expense from a given ExpenseType tab.
+     * 
+     * @param expenseToRemove - the Expense to remove
+     * @param expenseTabType  - the ExpenseType of the tab the Expense is being
+     *                        removed from
+     */
+    private void removeExpenseFromExpenseTab(Expense expenseToRemove, ExpenseType expenseTabType) {
+        removeExpenseFromTab(expenseToRemove, Optional.of(expenseTabType));
+    }
+
+    /**
+     * Removes an Expense from a Tab based on the given ExpenseType
+     * 
+     * @param expenseToRemove - the Expense to be removed
+     * @param expenseTabType  - the ExpenseType of the Tab the Expense is being
+     *                        removed from
+     */
+    @SuppressWarnings("unchecked")
+    private void removeExpenseFromTab(Expense expenseToRemove, Optional<ExpenseType> expenseTabType) {
+        try {
+
+            // Chooses which Tab to remove the Expense from based on the given parameters
+            switch (expenseTabType.isPresent() ? expenseTabType.get() : expenseToRemove.getExpenseType()) {
+                case ExpenseType.EXPENSE:
+
+                    // Removes the Expense from the relvant Tab (based on the given ExpenseType)
+                    for (Tab payPeriodTab : (((TabPane) (expenseTypeTabPane.getTabs().get(0).getContent()))
+                            .getTabs())) {
+
+                        // The TableView that the expense is being removed from
+                        TableView<Expense> expenseTableView = (TableView<Expense>) ((HBox) (payPeriodTab.getContent()))
+                                .getChildren().get(0);
+
+                        // If the Expense belongs to this PayPeriod, remove it from the TableView of the
+                        // given PayPeriod Tab
+                        if (expenseToRemove.getPayPeriod()
+                                .compareTo((((PayPeriod) payPeriodTab.getUserData()).getId())) == 0) {
+                            expenseTableView.getItems().remove(expenseToRemove);
+                        }
+
+                        autoResizeColumns(expenseTableView);
+                    }
+                    break;
+
+                case ExpenseType.INCOME:
+
+                    // Removes the Expense from the relvant Tab (based on the given ExpenseType)
+                    for (Tab payPeriodTab : (((TabPane) (expenseTypeTabPane.getTabs().get(0).getContent()))
+                            .getTabs())) {
+
+                        // The TableView that the expense is being removed from
+                        TableView<Expense> expenseTableView = (TableView<Expense>) ((HBox) (payPeriodTab.getContent()))
+                                .getChildren().get(0);
+
+                        // If the Expense belongs to this PayPeriod, remove it from the TableView of the
+                        // given PayPeriod Tab
+                        if (expenseToRemove.getPayPeriod()
+                                .compareTo((((PayPeriod) payPeriodTab.getUserData()).getId())) == 0) {
+                            expenseTableView.getItems().remove(expenseToRemove);
+                        }
+
+                        autoResizeColumns(expenseTableView);
+                    }
+                    break;
+
+                case ExpenseType.SAVINGS:
+
+                    // Removes the Expense from the relvant Tab (based on the given ExpenseType)
+                    ((TableView<Expense>) ((HBox) (expenseTypeTabPane.getTabs().get(1).getContent())).getChildren()
+                            .get(0))
+                            .getItems().remove(expenseToRemove);
+                    break;
+
+                case ExpenseType.RESERVED:
+
+                    // Removes the Expense from the relvant Tab (based on the given ExpenseType)
+                    ((TableView<Expense>) ((HBox) (expenseTypeTabPane.getTabs().get(2).getContent())).getChildren()
+                            .get(0))
+                            .getItems().remove(expenseToRemove);
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            Logger.error("Error removing Expense from a Tab: {}", e.getMessage());
+        }
     }
 
     /****************************** FXML FUNCTIONS ******************************/
@@ -756,7 +957,7 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         expenseController.deleteExpense(selectedExpense);
 
         // Delete the Expense from the TableView
-        currentTableView.getItems().remove(selectedExpense);
+        removeExpenseFromExpenseTab(selectedExpense);
 
         updateFundingLabels();
     }

@@ -128,7 +128,7 @@ public class AppUserHandler {
      * Call this method whenever a change made to the App User should persist after
      * closing the application
      */
-    private static void updateAppUser() {
+    public static void updateAppUser() {
         appUserController.updateEntry(appUser);
     }
 }

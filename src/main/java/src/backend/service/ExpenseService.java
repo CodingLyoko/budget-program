@@ -147,6 +147,11 @@ public class ExpenseService extends ServiceTemplate {
                 break;
         }
 
+        // Update funding values based on old ExpenseType value
+        if (expense.getExpenseType() != oldExpense.getExpenseType()) {
+            oldExpense.updateExpenseType(expense.getExpenseType());
+        }
+
         return expense.getId();
     }
 
