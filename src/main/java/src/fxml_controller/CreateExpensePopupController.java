@@ -59,12 +59,14 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
     }
 
     /**
-     * Configures the layout/options of the popup based on the ExpenseType of the
-     * Expense being created.
+     * Does various setup prior to opening the popup.
      * 
      * @param expenseType - the Expense Type of the expense being created
      */
     public void configurePopup(ExpenseType expenseType) {
+
+        // Configures the layout/options of the popup based on the ExpenseType of the
+        // Expense being created.
         setExpenseTypes(expenseType);
         updateSpendingLimitLabel(expenseType);
     }
@@ -120,49 +122,7 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
     private void setInputListeners() {
         instantiateInputValueMap();
 
-        // Filter selectable options based on current input text
-        expenseNameInput.getEditor().textProperty().addListener((_, _, newValue) -> {
-
-            // Maps the new value in the input field
-            inputValues.put("expenseNameInput", newValue);
-
-            final TextField editor = expenseNameInput.getEditor();
-            final String selected = expenseNameInput.getSelectionModel().getSelectedItem();
-
-            // If no item in the list is selected or the selected item
-            // isn't equal to the current input, we refilter the list.
-            if (selected == null || !selected.equals(editor.getText())) {
-
-                // Filters both the selectable Expense name options AS WELL AS the related
-                // Expense data
-                filteredExpenses
-                        .setPredicate(item -> item.getExpenseName().toUpperCase().startsWith(newValue.toUpperCase()));
-                filteredExpenseNames.setPredicate(item -> item.toUpperCase().startsWith(newValue.toUpperCase()));
-            }
-
-            expenseNameInput.setItems(filteredExpenseNames);
-            expenseNameInput.setUserData(filteredExpenses);
-
-            checkInputsCompleted();
-        });
-
-        // If the user selected an existing Expense, populate the other input feilds
-        // with that Expense's data
-        expenseNameInput.getSelectionModel().selectedItemProperty().addListener((_, _, _) -> {
-            if (expenseNameInput.getSelectionModel().getSelectedIndex() >= 0) {
-                Expense selectedExpense = ((List<Expense>) expenseNameInput.getUserData())
-                        .get(expenseNameInput.getSelectionModel().getSelectedIndex());
-
-                spendingLimitInput.setText(selectedExpense.getSpendingLimit().toString());
-
-                // Only update ExpenseType if the selected value is a selectable option
-                if (expenseTypeInput.getItems().contains(selectedExpense.getExpenseType())) {
-                    expenseTypeInput.getSelectionModel().select(selectedExpense.getExpenseType());
-                }
-            }
-
-            checkInputsCompleted();
-        });
+        instantiateFavoriteExpenseSelection();
 
         spendingLimitInput.textProperty().addListener((_, _, newValue) -> {
             inputValues.put("spendingLimitInput", newValue);
@@ -189,6 +149,49 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
         inputValues.put("expenseNameInput", "");
         inputValues.put("spendingLimitInput", "");
         inputValues.put("expenseTypeInput", "");
+    }
+
+    /**
+     * Implements the logic to allow the user to select a favorited Expense when
+     * creating a new Expense.
+     */
+    private void instantiateFavoriteExpenseSelection() {
+
+        // Filter selectable options based on current input text
+        expenseNameInput.getEditor().textProperty().addListener((_, _, newValue) -> {
+
+            // Maps the new value in the input field
+            inputValues.put("expenseNameInput", newValue);
+
+            // Filters both the selectable Expense name options AS WELL AS the related
+            // Expense data
+            // TODO: An error is thrown when the user continues typing after selecting an
+            // Expense from the dropdown (and is NOT triggered when the name code is
+            // commented out)
+            filteredExpenseNames.setPredicate(item -> item.toUpperCase().startsWith(newValue.toUpperCase()));
+            filteredExpenses
+                    .setPredicate(item -> item.getExpenseName().toUpperCase().startsWith(newValue.toUpperCase()));
+
+            checkInputsCompleted();
+        });
+
+        // If the user selected an existing Expense, populate the other input fields
+        // with that Expense's data
+        expenseNameInput.getSelectionModel().selectedItemProperty().addListener((_, _, _) -> {
+            if (expenseNameInput.getSelectionModel().getSelectedIndex() >= 0) {
+                Expense selectedExpense = ((List<Expense>) expenseNameInput.getUserData())
+                        .get(expenseNameInput.getSelectionModel().getSelectedIndex());
+
+                spendingLimitInput.setText(selectedExpense.getSpendingLimit().toString());
+
+                // Only update ExpenseType if the selected value is a selectable option
+                if (expenseTypeInput.getItems().contains(selectedExpense.getExpenseType())) {
+                    expenseTypeInput.getSelectionModel().select(selectedExpense.getExpenseType());
+                }
+            }
+
+            checkInputsCompleted();
+        });
     }
 
     /**
@@ -235,8 +238,8 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
 
         // Sets the selectable options for the Expense names and stores the related
         // Expense data
-        expenseNameInput.setItems(unfilteredExpenseNames);
-        expenseNameInput.setUserData(unfilteredExpenses);
+        expenseNameInput.setItems(filteredExpenseNames);
+        expenseNameInput.setUserData(filteredExpenses);
     }
 
     @FXML
@@ -284,5 +287,6 @@ public class CreateExpensePopupController extends FXMLControllerTemplate {
         expenseNameInput.setValue("");
         spendingLimitInput.clear();
         alreadyPaidCheckBox.setSelected(false);
+        inputValues.clear();
     }
 }

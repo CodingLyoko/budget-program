@@ -37,3 +37,6 @@
 ## Version 1.3.0
 - Fixed bugs with updating ExpenseType for an Expense
 - Reworked workflow for adding Expenses to a TableView
+
+## Version 1.3.1
+- Fixed bug where favorited Expenses were not showing up after creating an Expense
