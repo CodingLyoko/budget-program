@@ -120,8 +120,6 @@ public class ExpensesPageController extends FXMLControllerTemplate {
         createPayPeriodTabs(expenseYearInput.getValue());
 
         payPeriodInfoVBox.setSpacing(10);
-
-        populateExpenseTabs();
     }
 
     private void setAvailableFundsLabel() {
@@ -327,30 +325,6 @@ public class ExpensesPageController extends FXMLControllerTemplate {
     }
 
     /**
-     * Adds all Expenses to the expense tabs.
-     */
-    private void populateExpenseTabs() {
-
-        // Iterate through each expense tab
-        for (Tab expenseTab : expenseTypeTabPane.getTabs()) {
-
-            // Get the ExpenseType of the expense tab
-            ExpenseType currentExpenseType = (ExpenseType) expenseTab.getUserData();
-
-            // Adds every Expense of the given ExpenseType to the expense tab
-            for (Expense expense : expenseController.getExpensesByExpenseType(currentExpenseType)) {
-                addExpenseToTable(expense);
-            }
-        }
-
-        // Expenses of ExpenseType INCOME share the same tab as EXPENSE (but are not
-        // represented in the Tab itself), so these Expeneses must be explicitly added
-        for (Expense expense : expenseController.getExpensesByExpenseType(ExpenseType.INCOME)) {
-            addExpenseToTable(expense);
-        }
-    }
-
-    /**
      * Adds Tabs for each Pay Period for a given expense year.
      * 
      * @param expenseYear - the year used to specify which Pay Period to create Tabs
@@ -406,7 +380,6 @@ public class ExpensesPageController extends FXMLControllerTemplate {
 
         // Add Expenses to the TableView for the given Pay Period
         for (Expense expense : expenseController.getExpensesByPayPeriod(payPeriod.getId())) {
-
             // Only show expenses that are of type "Expense" or "Income"
             if (expense.getExpenseType().equals(ExpenseType.EXPENSE)
                     || expense.getExpenseType().equals(ExpenseType.INCOME)) {
@@ -641,6 +614,10 @@ public class ExpensesPageController extends FXMLControllerTemplate {
                         // given PayPeriod Tab
                         if (expenseToMove.getPayPeriod()
                                 .compareTo((((PayPeriod) payPeriodTab.getUserData()).getId())) == 0) {
+                            System.out.println("\n===============");
+                            System.out.println("Adding Expense " + expenseToMove.getExpenseName() + " to Pay Period: "
+                                    + (((PayPeriod) payPeriodTab.getUserData()).getId()));
+                            System.out.println("================");
                             expenseTableView.getItems().add(expenseToMove);
                         }
 

@@ -46,3 +46,6 @@
 
 ## Version 1.3.3
 - Fix bug where Expenses were not being added to PAy Period tabs on Expense Year change
+
+## Version 1.3.4
+- Remove function (and its related call) that was erroneously adding expenses to the Pay Period tabs
