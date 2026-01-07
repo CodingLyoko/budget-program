@@ -20,7 +20,6 @@ public class PayPeriodService extends ServiceTemplate {
     public List<Integer> getExpenseYears() throws SQLException, SecurityException {
 
         List<Integer> result = new ArrayList<>();
-        result.add(Year.now().getValue()); // Default value is the current year
 
         connectToDatabase();
 
@@ -34,14 +33,17 @@ public class PayPeriodService extends ServiceTemplate {
         // resultSet.next(); if we only used the WHILE part of the loop (and there was
         // only one pay period entry), then resultSet.next() would return false (and no
         // value would be added to the result)
-        if (resultSet.isBeforeFirst()) {
-            do {
-                calendar.setTime(resultSet.getDate("start_date"));
-                result.add(calendar.get(Calendar.YEAR));
-            } while (resultSet.next());
-        }
+        do {
+            calendar.setTime(resultSet.getDate("start_date"));
+            result.add(calendar.get(Calendar.YEAR));
+        } while (resultSet.next());
 
         closeDatabaseConnections();
+
+        // If no Expense Years are found, give a default value of the current year
+        if (result.isEmpty()) {
+            result.add(Year.now().getValue());
+        }
 
         return result;
     }

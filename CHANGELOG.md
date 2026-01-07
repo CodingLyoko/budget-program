@@ -40,3 +40,6 @@
 
 ## Version 1.3.1
 - Fixed bug where favorited Expenses were not showing up after creating an Expense
+
+## Version 1.3.2
+- Fix bug where new Expense Year was added incorrectly
