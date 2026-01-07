@@ -24,7 +24,6 @@ public class PayPeriodService extends ServiceTemplate {
         connectToDatabase();
 
         ResultSet resultSet = getQueryResults("SELECT start_date FROM " + TABLE_NAME);
-        System.out.println("Retrieved start dates");
 
         Calendar calendar = Calendar.getInstance();
 

@@ -396,6 +396,14 @@ public class ExpensesPageController extends FXMLControllerTemplate {
             infoVBox.getChildren().add(payPeriodInfoVBox);
         }
 
+        newTab.setContent(tabContent);
+
+        // Sets the currently-selected Pay Period tab to this Tab
+        currentSelectedPayPeriodTab = newTab;
+
+        // Adds the Tab to the Pay Period TabPane
+        payPeriodTabPane.getTabs().add(newTab);
+
         // Add Expenses to the TableView for the given Pay Period
         for (Expense expense : expenseController.getExpensesByPayPeriod(payPeriod.getId())) {
 
@@ -405,14 +413,6 @@ public class ExpensesPageController extends FXMLControllerTemplate {
                 addExpenseToTable(expense);
             }
         }
-
-        newTab.setContent(tabContent);
-
-        // Sets the currently-selected Pay Period tab to this Tab
-        currentSelectedPayPeriodTab = newTab;
-
-        // Adds the Tab to the Pay Period TabPane
-        payPeriodTabPane.getTabs().add(newTab);
     }
 
     /**
