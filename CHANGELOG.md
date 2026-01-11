@@ -49,3 +49,6 @@
 
 ## Version 1.3.4
 - Remove function (and its related call) that was erroneously adding expenses to the Pay Period tabs
+
+## Version 1.3.5
+- Fix bug where Non-Pay Period tabs were not being populated with Expenses
